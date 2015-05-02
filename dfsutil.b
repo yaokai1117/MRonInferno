@@ -28,7 +28,10 @@ DFSNode.toString(dn : self ref DFSNode) : string
 # implement DFSNodeCmp, a comparator of DFSNode
 DFSNodeCmp.gt(dnc : self ref DFSNodeCmp, x, y : ref DFSNode) : int
 {
-	return x.chunkNumber - y.chunkNumber;
+	if (x.chunkNumber > y.chunkNumber)
+		return 1;
+	else
+		return 0;
 }
 
 # implement functions of DFSChunk
@@ -70,10 +73,8 @@ DFSChunkCmp.gt(dcc : self ref DFSChunkCmp, x, y : ref DFSChunk) : int
 {
 	if (x.offset > y.offset)
 		return 1;
-	else if (x.offset == y.offset)
-		return 0;
 	else
-		return -1;
+		return 0;
 }
 
 # implement functions of DFSFile

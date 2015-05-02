@@ -27,7 +27,6 @@ DFSChunkCmp : import dfsutil;
 DFSNodeCmp : import dfsutil;
 
 metadata : ref MetaData;
-test : Table[ref DFSFile];
 maxFileId := 0 ;
 maxChunkId := 0;
 
@@ -39,7 +38,7 @@ init()
 	lists = load Lists Lists->PATH;
 	tables = load Tables Tables->PATH;
 	hash = load Hash Hash->PATH;
-	metadata.nodes = nil;
+	metadata = ref MetaData(nil, nil, nil, nil);
 	metadata.fileIndex = hash->new(100);
 	metadata.files = Table[ref DFSFile].new(100, nil);
 	metadata.chunks = Table[ref DFSChunk].new(1000, nil);
@@ -77,6 +76,7 @@ listFiles() : list of string
 			ret = sys->sprint("%d\t%s\t%d\n", file.id, file.name, file.replicas) :: ret;
 		}
 	}
+	ret = lists->reverse(ret);
 	return ret;
 }
 
