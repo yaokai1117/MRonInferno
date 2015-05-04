@@ -67,13 +67,18 @@ listFiles() : list of string
 	file : ref DFSFile;
 	length := len metadata.files.items;
 	nilint : int;
+	size : big;
 
-	ret = "id\tname\treplicas\n" :: ret;
+	ret = "id\tname\tsize\treplicas\n" :: ret;
 
 	for (i := 0; i < length; i++) {
 		for(p = metadata.files.items[i]; p != nil; p = tl p) {
 			(nilint, file) = hd p;
-			ret = sys->sprint("%d\t%s\t%d\n", file.id, file.name, file.replicas) :: ret;
+			if (file.chunks == nil)
+				size = big 0;
+			else
+				size = (hd file.chunks).offset + big (hd file.chunks).size;
+			ret = sys->sprint("%d\t%s\t%bd\t%d\n", file.id, file.name, size, file.replicas) :: ret;
 		}
 	}
 	ret = lists->reverse(ret);
@@ -91,14 +96,18 @@ deleteFile(fileName : string)
 		metadata.chunks.del((hd p).id);
 }
 
-createChunk(fileName : string, offset : big, size : int)
+createChunk(fileName : string, offset : big, size : int) : int
 {
 	hval := metadata.fileIndex.find(fileName);
 	fileId := hval.i;
 	file := metadata.files.find(fileId);
-	chunk := ref DFSChunk(maxChunkId++, fileId, offset, size, allocNodes(file.replicas));
+	nodes := allocNodes(file.replicas);
+	if (nodes == nil)
+		return 1;
+	chunk := ref DFSChunk(maxChunkId++, fileId, offset, size, nodes);
 	file.addChunk(chunk);
 	metadata.chunks.add(chunk.id, chunk);
+	return 0;
 }
 
 allocNodes(replicas : int) : list of ref DFSNode

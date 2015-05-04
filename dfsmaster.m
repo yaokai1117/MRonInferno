@@ -15,7 +15,7 @@ DFSMaster : module {
 	listFiles : fn() : list of string;
 	deleteFile : fn(fileName : string);	
 
-	createChunk : fn(fileName : string, offset : big, size : int); 
+	createChunk : fn(fileName : string, offset : big, size : int) : int;
 
 	updateNode : fn(node : ref DFSUtil->DFSNode);
 	removeNode : fn(node : ref DFSUtil->DFSNode);
