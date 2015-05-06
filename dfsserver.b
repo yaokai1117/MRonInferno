@@ -6,17 +6,19 @@ include "dfsmaster.m";
 include "dfsutil.m";
 include "hash.m";
 include "tables.m";
-include "lists.m";
-
-sys : Sys;
-dfsmaster : DFSMaster;
-dfsutil : DFSUtil;
 
 Connection : import sys;
 
 DFSFile : import dfsutil;
 DFSChunk : import dfsutil;
 DFSNode : import dfsutil;
+
+sys : Sys;
+dfsmaster : DFSMaster;
+dfsutil : DFSUtil;
+
+dataPath : con "/usr/yaokai/ser";
+homePath : con "/usr/yaokai";
 
 
 DFSServer : module {
@@ -61,16 +63,20 @@ hdlrthread(conn : Connection, ctxt : ref Draw->Context)
 	msgStr := array [sys->ATOMICIO] of byte;
 	msg : list of string;
 	
+	dfsmaster->updateNode(ref DFSNode("home", 110, 3));
+	dfsmaster->updateNode(ref DFSNode("school", 233, 0));
+	dfsmaster->updateNode(ref DFSNode("hospital", 120, 2));
 	
 	rdfd := sys->open(conn.dir + "/data", sys->OREAD);
 	wdfd := sys->open(conn.dir + "/data", sys->OWRITE);
+	dfd := sys->open(conn.dir + "/data", sys->ORDWR);
 	rfd := sys->open(conn.dir + "/remote", sys->OREAD);
 
 	addrlen := sys->read(rfd, addr, len addr);
 	sys->print("Message from: %s\n", string addr[:addrlen]);
 
 	msglen := sys->read(rdfd, msgStr, len msgStr);
-	msg = split(string msgStr[:msglen], '@');
+	(nil, msg) = sys->tokenize(string msgStr[:msglen], "@");
 	op := hd msg;
 	msg = tl msg;
 	name : string;
@@ -100,6 +106,18 @@ hdlrthread(conn : Connection, ctxt : ref Draw->Context)
 			fileList := dfsmaster->listFiles();
 			sys->fprint(wdfd, "%s", list2string(fileList));
 		}
+		
+		"get" => {
+			name = hd msg;
+			msg = tl msg;
+			file := dfsmaster->getFile(name);
+			sys->mount(dfd, nil, dataPath,Sys->MCREATE, nil);
+			sys->chdir(dataPath);
+			xmlf := sys->create(name + ".xml", sys->ORDWR, 8r600);
+			file2xml(xmlf, file);
+			sys->unmount(nil, dataPath);
+			sys->chdir(homePath);
+		}
 
 		"chunk" => {
 			name = hd msg;
@@ -117,27 +135,6 @@ hdlrthread(conn : Connection, ctxt : ref Draw->Context)
 
 }
 
-split(src : string, div : int) : list of string
-{
-	ret : list of string;
-	i := 0;
-	offset := 0;
-	length := len src;
-	lists := load Lists Lists->PATH;
-	
-	while (i < length) {
-		if (src[i] == div) {
-			ret = src[offset:i] :: ret;
-			offset = i + 1;
-		}
-		i++;
-	}
-	if (offset < length)
-		ret = src[offset:] :: ret;
-	ret = lists->reverse(ret);
-	return ret;
-}
-
 list2string(src : list of string) : string
 {
 	ret : string;
@@ -146,24 +143,35 @@ list2string(src : list of string) : string
 	return ret;
 }
 	
-		
+file2xml(xmlf : ref Sys->FD, file : ref DFSFile) 
+{
+	sys->fprint(xmlf, "<file>");
+	sys->fprint(xmlf, "<name>%s</name>", file.name);
+	sys->fprint(xmlf, "<id>%d</id>", file.id);
+	sys->fprint(xmlf, "<rep>%d</rep>", file.replicas);
+	for (p := file.chunks; p != nil; p = tl p)
+		chunk2xml(xmlf, hd p);
+	sys->fprint(xmlf, "</file>");
+}
 
+chunk2xml(xmlf : ref Sys->FD, chunk : ref DFSChunk)
+{
+	sys->fprint(xmlf, "<chunk>");
+	sys->fprint(xmlf, "<id>%d</id>", chunk.id);
+	sys->fprint(xmlf, "<offset>%bd</offset>", chunk.offset);
+	sys->fprint(xmlf, "<size>%d</size>", chunk.size);
+	for (p := chunk.nodes; p != nil; p = tl p)
+		node2xml(xmlf, hd p);
+	sys->fprint(xmlf, "</chunk>");
+}
 	
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+node2xml(xmlf : ref Sys->FD, node : ref DFSNode)
+{
+	sys->fprint(xmlf, "<node>");
+	sys->fprint(xmlf, "<a>%s</a>", node.addr);
+	sys->fprint(xmlf, "<p>%d</p>", node.port);
+	sys->fprint(xmlf, "<c>%d</c>", node.chunkNumber);
+	sys->fprint(xmlf, "</node>");
+}
 
 
