@@ -32,12 +32,13 @@ init(ctxt : ref Draw->Context, args : list of string)
 	for (i := 0; i < 10; i++) {
 		chunk.addNode(ref DFSNode("test"+string i, 1995, i));
 	}
+	chunk.addNode(ref DFSNode("test plus", 1995, 7));
 	nodes := chunk.getNodes();
-	for (i = 0; i < 10; i++)
+	for (i = 0; i < 11; i++)
 		sys->print("%s", nodes[i].toString());
 	dnc := ref DFSNodeCmp();
 	sort->sort(dnc, nodes);
-	for (i = 0; i < 10; i++)
+	for (i = 0; i < 11; i++)
 		sys->print("%s", nodes[i].toString());
 	sys->print("test removeNode\n"); 
 	for (i = 0; i < 5; i++) 

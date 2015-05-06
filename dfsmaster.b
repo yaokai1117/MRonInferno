@@ -141,9 +141,12 @@ updateNode(node : ref DFSNode)
 	}
 }
 
-removeNode(node : ref DFSNode)
+removeNode(node : ref DFSNode) : int
 {
+	if (lists->find(node, metadata.nodes) == nil)
+		return 1;
 	metadata.nodes = lists->delete(node, metadata.nodes);
+	return 0;
 }
 
 	

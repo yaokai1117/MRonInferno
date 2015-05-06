@@ -51,6 +51,9 @@ init(ctxt : ref Draw->Context, args : list of string)
 	sys->print("%s", chunk.toString());
 	for (q := chunk.nodes; q != nil; q = tl q)
 		sys->print("%s", (hd q).toString());
+	strlist = dfsmaster->listFiles();
+	for (p = strlist; p != nil; p = tl p)
+		sys->print("%s", hd p);
 	dfsmaster->removeNode(ref DFSNode("hospital", 120, 2));
 	dfsmaster->createChunk("yaokaitext", big 10, 10);
 	file = dfsmaster->getFile("yaokaitext");
