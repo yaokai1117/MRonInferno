@@ -13,7 +13,7 @@ DFSMaster : module {
 	createFile : fn(fileName : string, replicas : int);
 	getFile : fn(fileName : string) : ref DFSUtil->DFSFile;
 	listFiles : fn() : list of string;
-	deleteFile : fn(fileName : string);	
+	deleteFile : fn(fileName : string) : int;	
 
 	createChunk : fn(fileName : string, offset : big, size : int) : int;
 

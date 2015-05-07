@@ -85,15 +85,18 @@ listFiles() : list of string
 	return ret;
 }
 
-deleteFile(fileName : string)
+deleteFile(fileName : string) : int
 {
 	hval := metadata.fileIndex.find(fileName);	
+	if (hval == nil)
+		return 1;
 	id := hval.i;
 	file := metadata.files.find(id);
 	metadata.fileIndex.delete(fileName);
 	metadata.files.del(id);
 	for (p := file.chunks; p != nil; p = tl p)
 		metadata.chunks.del((hd p).id);
+	return 0;
 }
 
 createChunk(fileName : string, offset : big, size : int) : int

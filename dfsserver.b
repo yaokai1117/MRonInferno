@@ -8,6 +8,9 @@ include "hash.m";
 include "tables.m";
 include "xmlhandle.m";
 
+include "xml.m";
+include "bufio.m";
+
 Connection : import sys;
 
 DFSFile : import dfsutil;
@@ -78,76 +81,84 @@ connHandle(conn : Connection, ctxt : ref Draw->Context)
 	sys->print("Message from: %s\n", string addr[:addrlen]);
 
 	msglen := sys->read(rdfd, msgStr, len msgStr);
-	(nil, msg) = sys->tokenize(string msgStr[:msglen], "@");
-	op := hd msg;
-	msg = tl msg;
-	case (op)
-	{
-		"create" => {
-			name := hd msg;
-			msg = tl msg;
-			replicas := int hd msg;
-			dfsmaster->createFile(name, replicas);
-			sys->fprint(wdfd, "Successfully create file %s !\n", name);
-		}
+	receive : while (msglen > 0) {
+		(nil, msg) = sys->tokenize(string msgStr[:msglen], "@");
+		op := hd msg;
+		msg = tl msg;
+		case (op)
+		{
+			"disconnect" => break receive;
+			"create" => {
+				name := hd msg;
+				msg = tl msg;
+				replicas := int hd msg;
+				dfsmaster->createFile(name, replicas);
+				sys->fprint(wdfd, "Successfully create file %s !\n", name);
+			}
 
-		"delete" => {
-			name := hd msg;
-			msg =tl msg;
-			dfsmaster->deleteFile(name);
-			sys->fprint(wdfd, "Successfully delete file %s !\n", name);
-		}
+			"delete" => {
+				name := hd msg;
+				msg =tl msg;
+				ok := dfsmaster->deleteFile(name);
+				if (ok == 0)
+					sys->fprint(wdfd, "Successfully delete file %s !\n", name);
+				else
+					sys->fprint(wdfd, "No such file in file list!\n");
+			}
 
-		"list" => {
-			fileList := dfsmaster->listFiles();
-			sys->fprint(wdfd, "%s", list2string(fileList));
-		}
-		
-		"get" => {
-			name := hd msg;
-			msg = tl msg;
-			file := dfsmaster->getFile(name);
-			xmlf := sys->create(dataPath + name + ".xml", sys->ORDWR, 8r600);
-			xmlhandle->file2xml(xmlf, file);
-			sys->seek(xmlf, big 0, Sys->SEEKSTART);
-			spawn sendXml(name, xmlf, conn);
-		}
+			"list" => {
+				fileList := dfsmaster->listFiles();
+				sys->fprint(wdfd, "%s", list2string(fileList));
+			}
+			
+			"get" => {
+				name := hd msg;
+				msg = tl msg;
+				file := dfsmaster->getFile(name);
+				xmlf := sys->create(dataPath + name + ".xml", sys->ORDWR, 8r600);
+				xmlhandle->file2xml(xmlf, file);
+				sys->seek(xmlf, big 0, Sys->SEEKSTART);
+				spawn sendXml(name, xmlf, conn);
+				break receive;
+			}
 
-		"chunk" => {
-			name := hd msg;
-			msg = tl msg;
-			offset := big hd msg;
-			msg = tl msg;
-			size := int hd msg;
-			ok := dfsmaster->createChunk(name, offset, size);
-			sys->fprint(wdfd, "%d", ok);
-		}
+			"chunk" => {
+				name := hd msg;
+				msg = tl msg;
+				offset := big hd msg;
+				msg = tl msg;
+				size := int hd msg;
+				ok := dfsmaster->createChunk(name, offset, size);
+				sys->fprint(wdfd, "%d", ok);
+			}
 
-		"upNode" => {
-			addr := hd msg;
-			msg = tl msg;
-			port := int hd msg;
-			msg = tl msg;
-			chunkNumber := int hd msg;
-			node := ref DFSNode(addr, port, chunkNumber);
-			dfsmaster->updateNode(node);
-			sys->fprint(wdfd, "Successfully update node %s", node.toString());
+			"upNode" => {
+				addr := hd msg;
+				msg = tl msg;
+				port := int hd msg;
+				msg = tl msg;
+				chunkNumber := int hd msg;
+				node := ref DFSNode(addr, port, chunkNumber);
+				dfsmaster->updateNode(node);
+				sys->fprint(wdfd, "Successfully update node %s", node.toString());
+			}
+			
+			"rmNode" => {
+				addr := hd msg;
+				msg = tl msg;
+				port := int hd msg;
+			    msg = tl msg;
+				ok := dfsmaster->removeNode(ref DFSNode(addr, port, 0));
+				if (ok == 0)
+					sys->fprint(wdfd, "Successfully remove node addr: %s, port: %d\n", addr, port);
+				else
+					sys->fprint(wdfd, "No such node in node list!\n");
+					
+			}
+			* =>
+				sys->fprint(wdfd, "Unknown message!\n");
 		}
-		
-		"rmNode" => {
-			addr := hd msg;
-			msg = tl msg;
-			port := int hd msg;
-		    msg = tl msg;
-			ok := dfsmaster->removeNode(ref DFSNode(addr, port, 0));
-			if (ok == 0)
-				sys->fprint(wdfd, "Successfully remove node addr: %s, port: %d", addr, port);
-			else
-				sys->fprint(wdfd, "No such node in node list!\n");
-				
-		}
-		* =>
-			sys->fprint(wdfd, "Unknown message!");
+		msglen = sys->read(rdfd, msgStr, len msgStr);
 	}
 
 }
@@ -172,7 +183,7 @@ sendXml(name : string, xmlf : ref Sys->FD, conn : Connection)
 		sys->write(xmlf2, buf[:length], length);
 	}while ( length == len buf);
 	sys->unmount(nil, dataPath + "remote");
-#	sys->remove(dataPath + name + ".xml");
+	sys->remove(dataPath + name + ".xml");
 }
 
 

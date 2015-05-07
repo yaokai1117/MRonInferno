@@ -1,13 +1,18 @@
 DFSClient : module {
 	PATH : con "/usr/yaokai/dfsclient.dis";
 	
+# establish a connection to master server
 	init : fn();
+
+# disconnect from master server, getFile has the same effect
+	disconnect : fn();
 
 	createFile : fn(fileName : string, replicas : int) : int;
 	createChunk : fn(fileName : string, offset : big, size : int) : int;
 	listFiles : fn() : string;
+	# Important!!! getfile will cause disconnection!! all opretaions after a getFile must init() first!!
 	getFile : fn(fileName : string) : ref DFSUtil->DFSFile;
-	deleteFile : fn(fileName : string);
+	deleteFile : fn(fileName : string) : int;
 
 #	readChunk : fn(chunk : ref DFSUtil->DFSChunk, offset : big, size : int) : array of byte;
 #	writeChunk : fn(chunk : ref DFSUtil->DFSChunk, offset : big, size : int, data : array of byte) : int;
