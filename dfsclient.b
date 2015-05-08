@@ -11,6 +11,7 @@ include "bufio.m";
 
 sys : Sys;
 dfsutil : DFSUtil;
+
 xml : Xml;
 xmlhd : XmlHandle;
 
@@ -19,6 +20,7 @@ DFSChunk : import dfsutil;
 DFSNode : import dfsutil;
 Connection : import sys;
 Parser : import xml;
+FD : import sys;
 
 masterAddr : string;
 masterPort : int;
@@ -46,7 +48,7 @@ init()
 	masterPort = 2333;
 	defaultRep = 3;
 	defaultChunkSize = 1<<20;
-	defaultTempPath = "/usr/yaokai/cli/";
+	defaultTempPath = "/usr/fyabc/cli/";
 
 	ok : int;
 	(ok, conn) = sys->dial("tcp!" + masterAddr + "!" + string masterPort, nil);
@@ -152,5 +154,133 @@ removeNode(addr : string, port : int) : int
 	return 0;
 }
 
+readChunk(chunk : ref DFSChunk, offset : big, size : int) : ref FD
+{
+	p := chunk.nodes;
+	for(node := hd p; node != nil; p = tl p)
+	{
+		if((ret := readChunkWithNode(node, chunk.id, offset, size)) != nil)
+			return ret;
+	}
+	sys->print("All nodes of this chunk %d are failed to read!", chunk.id);
+	return nil;
+}
 
+writeChunk(chunk : ref DFSChunk, offset : big, size : int, datafd : ref FD) : int
+{
+	ret := 0;
+	p := chunk.nodes;
+	for(node := hd p; node != nil; p = tl p)
+	{
+		if(writeChunkWithNode(node, chunk.id, offset, size, datafd) != 0)
+		{
+			sys->print("Write chunk %d in node addr: %s, port: %d failed!", chunk.id, node.addr, node.port);
+			ret = -1;
+		}
+		else
+		sys->print("Successed write chunk %d in node addr: %s, port: %d!", chunk.id, node.addr, node.port);
+    }
+    
+    return ret;
+}
+
+deleteChunk(chunk : ref DFSChunk) : int
+{
+	ret := 0;
+	p := chunk.nodes;
+	for(node := hd p; node != nil; p = tl p)
+	{
+		if(deleteChunkWithNode(node, chunk.id)!=0)
+		{
+			sys->print("Delete chunk %d in node addr: %s, port: %d failed!", chunk.id, node.addr, node.port);
+			ret = -1;
+		}
+		else
+		sys->print("Successed delete chunk %d in node addr: %s, port: %d!", chunk.id, node.addr, node.port);
+    }
+    
+    return ret;
+}
+
+lineOffset(fileName : string) : array of big
+{
+}
+
+lineOffsetChunk(chunk : ref DFSChunk) : array of big
+{
+}
+
+readChunkWithNode(node : ref DFSNode, chunkId : int, offset : big, size : int) : ref FD
+{
+	ok : int;
+	(ok, conn) = sys->dial("tcp!" + node.addr + "!" + string node.port, nil);
+	if (ok < 0)
+	{
+		sys->print("Error: DFSClient->readChunk--dial failed!\n");
+		return nil;
+	}
+	
+	buf := array [Sys->ATOMICIO] of byte;
+	msg := "read@" + string chunkId + "@" + string offset + "@" + string size;
+	sys->fprint(conn.dfd, "%s", msg);
+
+	sys->export(conn.dfd, defaultTempPath, Sys->EXPWAIT);
+
+	ret := sys->open(defaultTempPath + "datacopy_" + string chunkId, sys->ORDWR);
+	return ret;
+}
+
+writeChunkWithNode(node : ref DFSNode, chunkId : int, offset : big, size : int, datafd : ref FD) : int
+{
+	ok : int;
+	(ok, conn) = sys->dial("tcp!" + node.addr + "!" + string node.port, nil);
+	if (ok < 0)
+	{
+		sys->print("Error: DFSClient->writeChunk--dial failed!\n");
+		return -1;
+	}
+	
+	buf := array [Sys->ATOMICIO] of byte;
+	msg := "write@" + string chunkId + "@" + string offset + "@" + string size;
+	sys->fprint(conn.dfd, "%s", msg);
+	
+	spawn sendWriteData(datafd, chunkId, conn);
+
+	length := sys->read(conn.dfd, buf, len buf);
+	return int string buf[:length];	
+}
+
+deleteChunkWithNode(node : ref DFSNode, chunkId : int) : int
+{
+	ok : int;
+	(ok, conn) = sys->dial("tcp!" + node.addr + "!" + string node.port, nil);
+	if (ok < 0)
+	{
+		sys->print("Error: DFSClient->writeChunk--dial failed!\n");
+		return -1;
+	}
+	
+	buf := array [Sys->ATOMICIO] of byte;
+	msg := "delete@" + string chunkId;
+	sys->fprint(conn.dfd, "%s", msg);
+
+	length := sys->read(conn.dfd, buf, len buf);
+	return int string buf[:length];	
+}
+
+sendWriteData(datafd : ref FD, chunkId : int, conn : Connection)
+{
+	dfd := sys->open(conn.dir + "/data", sys->ORDWR);
+	sys->mount(dfd, nil, defaultTempPath + "remote",Sys->MCREATE, nil);
+	datacopyfd := sys->create(defaultTempPath + "remote/" + "datacopy_" + string chunkId, sys->ORDWR, 8r600);
+
+	buf := array [Sys->ATOMICIO] of byte;
+	length : int;
+	do {
+		length = sys->read(datafd, buf, len buf);
+		sys->write(datacopyfd, buf[:length], length);
+	}while (length == len buf);
+
+	sys->unmount(nil, defaultTempPath + "remote");
+}
 

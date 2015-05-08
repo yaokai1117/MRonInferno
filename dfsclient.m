@@ -10,8 +10,12 @@ DFSClient : module {
 	createFile : fn(fileName : string, replicas : int) : int;
 	createChunk : fn(fileName : string, offset : big, size : int) : int;
 	listFiles : fn() : string;
+
+
 	# Important!!! getfile will cause disconnection!! all opretaions after a getFile must init() first!!
 	getFile : fn(fileName : string) : ref DFSUtil->DFSFile;
+
+
 	deleteFile : fn(fileName : string) : int;
 
 #	readChunk : fn(chunk : ref DFSUtil->DFSChunk, offset : big, size : int) : array of byte;
