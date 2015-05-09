@@ -89,7 +89,6 @@ connHandle(conn : Connection, ctxt : ref Draw->Context)
 				dfd := sys->open(conn.dir + "/data", sys->ORDWR);
 				sys->fprint(dfd, "start");
 				sys->export(dfd, dataPath, Sys->EXPWAIT);	
-				sys->print("here");
 				break receive;
 			}
 			
