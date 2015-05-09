@@ -86,9 +86,8 @@ connHandle(conn : Connection, ctxt : ref Draw->Context)
 			}
 			
 			"write" => {
-				chunkId := int hd msg;
-
 				dfd := sys->open(conn.dir + "/data", sys->ORDWR);
+				sys->fprint(dfd, "start");
 				sys->export(dfd, dataPath, Sys->EXPWAIT);	
 				sys->print("here");
 				break receive;

@@ -69,6 +69,7 @@ connHandle(conn : Connection, ctxt : ref Draw->Context)
 	msgStr := array [sys->ATOMICIO] of byte;
 	msg : list of string;
 	
+	dfsmaster->updateNode(ref DFSNode("127.0.0.1", 2334, 3));
 #	dfsmaster->updateNode(ref DFSNode("home", 110, 3));
 #	dfsmaster->updateNode(ref DFSNode("school", 233, 0));
 #	dfsmaster->updateNode(ref DFSNode("hospital", 120, 2));

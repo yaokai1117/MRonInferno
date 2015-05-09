@@ -252,13 +252,12 @@ writeChunkWithNode(node : ref DFSNode, chunkId : int, size : int, datafd : ref F
 	}
 
 	buf := array [Sys->ATOMICIO] of byte;
-	msg := "write@" + string chunkId;
+	msg := "write" ;
 	sys->fprint(conn.dfd, "%s", msg);
 
 	sendWriteData(datafd, chunkId, size, conn);
 
-	#length := sys->read(conn.dfd, buf, len buf);
-	return 0; #int string buf[:length];	
+	return 0; 
 }
 
 deleteChunkWithNode(node : ref DFSNode, chunkId : int) : int
@@ -281,10 +280,9 @@ deleteChunkWithNode(node : ref DFSNode, chunkId : int) : int
 
 sendWriteData(datafd : ref FD, chunkId : int, size : int, conn : Connection)
 {
-	sys->print("111 %r\n");
-	sys->sleep(100);
+	stmsg := array[100] of byte;
+	n := sys->read(conn.dfd, stmsg, len stmsg);
 	sys->mount(conn.dfd, nil, defaultTempPath + "remote",Sys->MCREATE, nil);
-	sys->print("222\n");
 	datacopyfd := sys->create(defaultTempPath + "remote/" + string chunkId, sys->ORDWR, 8r600);
 
 	buf := array [Sys->ATOMICIO] of byte;

@@ -47,6 +47,8 @@ init(ctxt : ref Draw->Context, args : list of string)
 	dfsclient->createFile(fileName, replicas);
 	
 	fd := sys->open(fileName, Sys->ORDWR);
+	if (fd == nil)
+		exit;
 	(nil, dir) := sys->fstat(fd);
 	totalSize := dir.length;
 	offset := big 0;
@@ -60,12 +62,13 @@ init(ctxt : ref Draw->Context, args : list of string)
 
 	file := dfsclient->getFile(fileName);
 
-# writeChunks
-#	for (p := file.chunks; p != nil; p = tl p) {
-#	}
+	for (p := file.chunks; p != nil; p = tl p) {
+		chunk := hd p;
+		dfsclient->writeChunk(chunk, chunk.offset, chunk.size, fd);
+	}
 	
 	sys->print("%s", file.toString());
-	for (p := file.chunks; p != nil; p = tl p) {
+	for (p = file.chunks; p != nil; p = tl p) {
 		chunk := hd p;
 		sys->print("\t%s", chunk.toString());
 		for (q := chunk.nodes; q != nil; q = tl q)
