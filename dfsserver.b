@@ -89,6 +89,10 @@ connHandle(conn : Connection, ctxt : ref Draw->Context)
 		{
 			"disconnect" => break receive;
 			"create" => {
+				if (len msg != 2) {
+					sys->fprint(wdfd, "Unknown message!\n");
+					break;
+				}
 				name := hd msg;
 				msg = tl msg;
 				replicas := int hd msg;

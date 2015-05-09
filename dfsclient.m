@@ -14,9 +14,9 @@ DFSClient : module {
 	getFile : fn(fileName : string) : ref DFSUtil->DFSFile;
 	deleteFile : fn(fileName : string) : int;
 
-#	readChunk : fn(chunk : ref DFSUtil->DFSChunk, offset : big, size : int) : array of byte;
-#	writeChunk : fn(chunk : ref DFSUtil->DFSChunk, offset : big, size : int, data : array of byte) : int;
-#	deleteChunk : fn(chunk : ref DFSUtil->DFSChunk) : int;
+	readChunk : fn(chunk : ref DFSUtil->DFSChunk) : ref Sys->FD;
+	writeChunk : fn(chunk : ref DFSUtil->DFSChunk, offset : big, size : int, datafd : ref Sys->FD) : int;
+	deleteChunk : fn(chunk : ref DFSUtil->DFSChunk) : int;
 #	lineOffset : fn(fileName : string) : array of big;
 #	lineOffsetChunk : fn(chunk : ref DFSUtil->DFSChunk) : array of big;
 
