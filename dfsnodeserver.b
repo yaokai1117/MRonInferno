@@ -3,6 +3,7 @@ implement DFSNodeServer;
 include "sys.m";
 include "draw.m";
 include "dfsutil.m";
+include "dfsclient.m";
 
 
 Connection : import sys;
@@ -14,9 +15,13 @@ FD : import sys;
 
 sys : Sys;
 dfsutil : DFSUtil;
+dfsclient : DFSClient;
 
-dataPath : con "/usr/yaokai/ser/";
-homePath : con "/usr/yaokai/";
+dataPath := string "/usr/yaokai/ser/";
+homePath := string "/usr/yaokai/";
+localAddr := string "127.0.0.1";
+localPort := int 2334;
+chunkNumber := int 0;
 
 
 DFSNodeServer : module {
@@ -27,16 +32,27 @@ init(ctxt : ref Draw->Context, args : list of string)
 {
 	sys = load Sys Sys->PATH;
 	dfsutil = load DFSUtil DFSUtil->PATH;
+	dfsclient = load DFSClient DFSClient->PATH;
 
 	dfsutil->init();
+	spawn heartBeat();
 
-	(n, conn) := sys->announce("tcp!*!2334");
+	(n, conn) := sys->announce("tcp!*!" + string localPort);
 	if (n < 0) {
 		sys->print("DFSServer: announce failed %r\n");
 		exit;
 	}
 	while(1) {
 		listen(conn, ctxt);
+	}
+}
+
+heartBeat() {
+	while (1) {
+		dfsclient->init();
+		dfsclient->updateNode(localAddr, localPort, chunkNumber); 
+		dfsclient->disconnect();
+		sys->sleep(30000);
 	}
 }
 
@@ -89,13 +105,14 @@ connHandle(conn : Connection, ctxt : ref Draw->Context)
 				dfd := sys->open(conn.dir + "/data", sys->ORDWR);
 				sys->fprint(dfd, "start");
 				sys->export(dfd, dataPath, Sys->EXPWAIT);	
-				sys->print("here");
+				chunkNumber++;
 				break receive;
 			}
 			
 			"delete" => {
 				chunkId := hd msg;
 				sys->remove(dataPath + chunkId);	
+				chunkNumber--;
 			}
 			
 			"lineos" => {

@@ -28,11 +28,7 @@ defaultRep : int;
 defaultChunkSize : int;
 defaultTempPath : string;
 
-conn : Connection;
-
-init()
-{
-	if (sys == nil)
+conn : Connection; init() { if (sys == nil)
 		sys = load Sys Sys->PATH;
 	if (dfsutil == nil)
 		dfsutil = load DFSUtil DFSUtil->PATH;

@@ -30,7 +30,7 @@ init(ctxt : ref Draw->Context, args : list of string)
 	dfsclient->init();
 
 	replicas := 3;
-	chunkSize := 100; 		# debug
+	chunkSize := 1000; 		# debug
 	arg->init(args);
 	while ((c := arg->opt()) != 0)
 		case c {
@@ -53,12 +53,12 @@ init(ctxt : ref Draw->Context, args : list of string)
 	totalSize := dir.length;
 	offset := big 0;
 	while (totalSize > big chunkSize) {
-		totalSize -= big chunkSize;
-		if (big chunkSize > totalSize)
-			chunkSize = int totalSize;
 		dfsclient->createChunk(fileName, offset, chunkSize);
 		offset += big chunkSize;
+		totalSize -= big chunkSize;
 	}
+	if (totalSize != big 0)
+		dfsclient->createChunk(fileName, offset, int totalSize);
 
 	file := dfsclient->getFile(fileName);
 
