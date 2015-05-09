@@ -15,8 +15,8 @@ FD : import sys;
 sys : Sys;
 dfsutil : DFSUtil;
 
-dataPath : con "/usr/yaokai/ser/";
-homePath : con "/usr/yaokai/";
+dataPath : con "/usr/fyabc/ser/";
+homePath : con "/usr/fyabc/";
 
 
 DFSNodeServer : module {
@@ -89,7 +89,6 @@ connHandle(conn : Connection, ctxt : ref Draw->Context)
 				dfd := sys->open(conn.dir + "/data", sys->ORDWR);
 				sys->fprint(dfd, "start");
 				sys->export(dfd, dataPath, Sys->EXPWAIT);	
-				sys->print("here");
 				break receive;
 			}
 			
