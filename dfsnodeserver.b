@@ -15,8 +15,8 @@ FD : import sys;
 sys : Sys;
 dfsutil : DFSUtil;
 
-dataPath : con "/usr/yaokai/ser/";
-homePath : con "/usr/yaokai/";
+dataPath : con "/usr/fyabc/ser/";
+homePath : con "/usr/fyabc/";
 
 
 DFSNodeServer : module {
