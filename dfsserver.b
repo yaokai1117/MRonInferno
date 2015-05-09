@@ -22,8 +22,8 @@ dfsmaster : DFSMaster;
 dfsutil : DFSUtil;
 xmlhandle : XmlHandle;
 
-dataPath : con "/usr/yaokai/ser/";
-homePath : con "/usr/yaokai/";
+dataPath : con "/usr/fyabc/ser/";
+homePath : con "/usr/fyabc/";
 
 
 DFSServer : module {
