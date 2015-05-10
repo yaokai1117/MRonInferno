@@ -3,7 +3,7 @@
 a small MapReduce framework on Inferno written in Limbo, just like many other MarReduce framework, our code is divided into two parts, a distrbuted file system and the mapreduce calculation model.
 
 ## MapReduce Calculation Model
-	still in implementation.
+still in implementation.
 
 ## DFS 
 this part is the file partition,transport and scheduling module of our MapReduce framework.
