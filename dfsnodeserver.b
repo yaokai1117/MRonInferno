@@ -111,7 +111,8 @@ connHandle(conn : Connection, ctxt : ref Draw->Context)
 			
 			"delete" => {
 				chunkId := hd msg;
-				sys->remove(dataPath + chunkId);	
+				ok := sys->remove(dataPath + chunkId);	
+				sys->fprint(wdfd, "%d", ok);	
 				chunkNumber--;
 			}
 			

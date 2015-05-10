@@ -102,9 +102,21 @@ getFile(fileName : string) : ref DFSFile
 	buf := array [Sys->ATOMICIO] of byte;
 	msg := "get@" + fileName;
 	sys->fprint(conn.dfd, "%s", msg);
+
+	length := sys->read(conn.dfd, buf, len buf);
+	if (length <= 0) {
+		sys->print("Error: DFSClient--deleteFile failed!\n");	
+		return nil;
+	}
+	sys->print("%s", string buf[:length]);
+	if (int buf[0] == 'N')
+		return nil;
+
+	sys->fprint(conn.dfd, "start");
 	sys->export(conn.dfd, defaultTempPath, Sys->EXPWAIT);	
 	parser := xmlhd->init(defaultTempPath + fileName + ".xml");
 	file := xmlhd->xml2file(parser);
+	sys->remove(defaultTempPath + fileName + ".xml");
 	return file;
 }
 
@@ -113,12 +125,16 @@ deleteFile(fileName : string) : int
 	buf := array [Sys->ATOMICIO] of byte;
 	msg := "delete@" + fileName;
 	sys->fprint(conn.dfd, "%s", msg);
+	
 	length := sys->read(conn.dfd, buf, len buf);
 	if (length <= 0) {
 		sys->print("Error: DFSClient--deleteFile failed!\n");	
 		return 1;
 	}
 	sys->print("%s", string buf[:length]);
+	if (int buf[0] == 'N')
+		return 1;
+
 	return 0;
 }
 
@@ -141,12 +157,16 @@ removeNode(addr : string, port : int) : int
 	buf := array [Sys->ATOMICIO] of byte;
 	msg := "rmNode@" + addr + "@" + string port; 
 	sys->fprint(conn.dfd, "%s", msg);
+
 	length := sys->read(conn.dfd, buf, len buf);
 	if (length <= 0) {
 		sys->print("Error: DFSClient--removeNode failed!\n");	
 		return 1;
 	}
 	sys->print("%s", string buf[:length]);
+	if (int buf[0] == 'N')
+		return 1;
+
 	return 0;
 }
 
@@ -161,7 +181,7 @@ readChunk(chunk : ref DFSChunk) : ref FD
 		node = hd p;
 		if((ret := readChunkWithNode(node, chunk.id)) != nil)
 			return ret;
-		}
+	}
 		sys->print("All nodes of this chunk %d are failed to read!", chunk.id);
 	return nil;
 }

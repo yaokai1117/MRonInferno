@@ -90,10 +90,6 @@ connHandle(conn : Connection, ctxt : ref Draw->Context)
 		{
 			"disconnect" => break receive;
 			"create" => {
-				if (len msg != 2) {
-					sys->fprint(wdfd, "Unknown message!\n");
-					break;
-				}
 				name := hd msg;
 				msg = tl msg;
 				replicas := int hd msg;
@@ -120,6 +116,16 @@ connHandle(conn : Connection, ctxt : ref Draw->Context)
 				name := hd msg;
 				msg = tl msg;
 				file := dfsmaster->getFile(name);
+
+				if (file == nil) {
+					sys->fprint(wdfd, "No such file!");
+					break receive;
+				}
+				else 
+					sys->fprint(wdfd, "Successly find file %s", name);
+
+				buf := array [100] of byte;
+				sys->read(rdfd, buf, len buf);
 				xmlf := sys->create(dataPath + name + ".xml", sys->ORDWR, 8r600);
 				xmlhandle->file2xml(xmlf, file);
 				sys->seek(xmlf, big 0, Sys->SEEKSTART);
