@@ -128,8 +128,10 @@ allocNodes(replicas : int) : list of ref DFSNode
 	sort->sort(dnc, nodes);
 	if (replicas > length)
 		replicas = length;
-	for (i = 0; i < replicas; i++)
+	for (i = 0; i < replicas; i++) {
+		nodes[replicas-1-i].chunkNumber++;
 		ret = nodes[replicas-1-i] :: ret;
+	}
 	return ret;
 }
 

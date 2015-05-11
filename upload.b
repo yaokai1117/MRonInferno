@@ -42,6 +42,10 @@ init(ctxt : ref Draw->Context, args : list of string)
 			}
 		}
 	args = arg->argv();
+	if (args == nil) {
+		sys->print("Please input file name!\n");
+		exit;
+	}
 	fileName := hd args;
 
 	dfsclient->createFile(fileName, replicas);
@@ -53,7 +57,8 @@ init(ctxt : ref Draw->Context, args : list of string)
 	totalSize := dir.length;
 	offset := big 0;
 	while (totalSize > big chunkSize) {
-		dfsclient->createChunk(fileName, offset, chunkSize);
+		if (dfsclient->createChunk(fileName, offset, chunkSize) != 0) 
+			exit;
 		offset += big chunkSize;
 		totalSize -= big chunkSize;
 	}

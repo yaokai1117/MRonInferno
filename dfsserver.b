@@ -118,11 +118,11 @@ connHandle(conn : Connection, ctxt : ref Draw->Context)
 				file := dfsmaster->getFile(name);
 
 				if (file == nil) {
-					sys->fprint(wdfd, "No such file!");
+					sys->fprint(wdfd, "No such file!\n");
 					break receive;
 				}
 				else 
-					sys->fprint(wdfd, "Successly find file %s", name);
+					sys->fprint(wdfd, "Successly find file %s\n", name);
 
 				buf := array [100] of byte;
 				sys->read(rdfd, buf, len buf);
