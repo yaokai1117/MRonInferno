@@ -1,9 +1,16 @@
 MRUtil : module {
-	PATH : con "/usr/fyabc/mrutil.dis";
-	Task : adt{
+	PATH : con "/usr/yaokai/mrutil.dis";
+	
+	SUCCESS : con 0;
+	PENDING : con 1;
+	FALIED 	: con -1;
+
+		
+	MapperTask : adt{
+		# common task properties 
 		taskId : int;
 		jobId : int;
-		taskStatus : int;		#//0 : pending; 1 : succeed; -1 : failed
+		taskStatus : int;		
 		attemptCount : int;
 		taskTrackerName : string;
 		mrClassName : string;
@@ -11,28 +18,41 @@ MRUtil : module {
 
 		createTaskFolder : fn();
 		deleteTaskFolder : fn();
-	}
 
-	MapperTask : adt{
-		basic : ref Task;	#//basic task info
-
+		# mapper
 		inputFileBlock : ref IOUtil->FileBlock;
 		reducerAmount : int;
-	}
+	};
 
 	ReducerTask : adt{
-		basic : ref Task;	#//basic task info
+		# common task properties 
+		taskId : int;
+		jobId : int;
+		taskStatus : int;		
+		attemptCount : int;
+		taskTrackerName : string;
+		mrClassName : string;
+		outputDir : string;
 
+		createTaskFolder : fn();
+		deleteTaskFolder : fn();
+
+		# reducer
 		outputFile : string;
 		partitionIndex : int;
 		mapperAmount : int;
 		replicas : int;
 		lineCount : int;
-	}
+	};
 
-	OutPutCollector : adt{
+	TaskTrackerInfo : adt {
+		name : string;
+		address : string;
+		port : int;
+		mapperTaskNum : int;
+		reducerTaskNum : int;
+	};
 
-	}
 
 	init : fn();
 };
