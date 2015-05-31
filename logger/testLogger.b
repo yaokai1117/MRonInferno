@@ -2,26 +2,32 @@ implement testLogger;
 
 include "sys.m";
 include "draw.m";
-include "filelogger.m";
+include "logger.m";
 
 sys : Sys;
-logger : FileLogger;
+logger : Logger;
 
 testLogger : module {
-	init: fn(ctxt : ref Draw->Context, args : list of string);
+	init: fn(nil : ref Draw->Context, nil : list of string);
 };
 
-init(ctxt : ref Draw->Context, args : list of string)
+init(nil : ref Draw->Context, nil : list of string)
 {
 	sys = load Sys Sys->PATH;
-	logger = load FileLogger FileLogger->PATH;
+	logger = load Logger Logger->PATH;
 
 	logger->init();
 
-	logger->log("This is the test message.");
-	logger->log("This is the test message2.");
+	logger->logInfo("This is the test message.");
+	logger->logInfo("This is the test message2.");
+	logger->sepaLine();
+	logger->logInfo("This is the test message3 below the separation line.");
+
+	logger->sepaLine();
+	logger->log("This is the warning message.", Logger->WARN);
+	logger->blankLine();
+	logger->log("This is the error message.", Logger->ERROR);
 
 	logger->setFileName("new log.txt");
-
-	logger->log("This is the new test message for new log.");
+	logger->logInfo("This is the new test message for new log.");
 }
