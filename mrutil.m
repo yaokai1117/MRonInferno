@@ -3,6 +3,7 @@ MRUtil : module {
 	
 	SUCCESS : con 0;
 	PENDING : con 1;
+	INIT 	: con 2;
 	FALIED 	: con -1;
 
 		
@@ -10,14 +11,11 @@ MRUtil : module {
 		# common task properties 
 		taskId : int;
 		jobId : int;
-		taskStatus : int;		
+		status : int;		
 		attemptCount : int;
 		taskTrackerName : string;
 		mrClassName : string;
 		outputDir : string;
-
-		createTaskFolder : fn();
-		deleteTaskFolder : fn();
 
 		# mapper
 		inputFileBlock : ref IOUtil->FileBlock;
@@ -28,14 +26,12 @@ MRUtil : module {
 		# common task properties 
 		taskId : int;
 		jobId : int;
-		taskStatus : int;		
+		status : int;		
 		attemptCount : int;
-		taskTrackerName : string;
+		taskTrackerAddr : string;
+		taskTrackerPort : int;
 		mrClassName : string;
 		outputDir : string;
-
-		createTaskFolder : fn();
-		deleteTaskFolder : fn();
 
 		# reducer
 		outputFile : string;
@@ -46,7 +42,6 @@ MRUtil : module {
 	};
 
 	TaskTrackerInfo : adt {
-		name : string;
 		address : string;
 		port : int;
 		mapperTaskNum : int;
