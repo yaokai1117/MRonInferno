@@ -3,47 +3,48 @@ implement JobTracker;
 include "sys.m";
 include "jobtracker.m";
 include "mrutil.m";
-include "table.m";
+include "tables.m";
 include "logger.m";
-include "job.m";
+include "jobs.m";
 
-Job : import job;
-JobConfig : import job;
+Job : import jobmodule;
+JobConfig : import jobmodule;
 MapperTask : import mrutil;
 ReducerTask : import mrutil;
 TaskTrackerInfo : import mrutil;
+Table : import table;
+Strhash : import table;
 
 sys : Sys;
-table : Table;
+table : Tables;
 mrutil : MRUtil;
-job : Job;
+jobmodule : Jobs;
 logger : Logger;
 
 
 #implementation of functions of module JobTracker 
 
-jobs : ref Table->Table[ref Job];
-taskTrackers : ref Table->StrHash[ref TaskTrackerInfo];
+jobs : ref Tables->Table[ref Job];
+taskTrackers : ref Tables->Strhash[ref TaskTrackerInfo];
 
-maxJobId : int;
 
 init()
 {
 	sys = load Sys Sys->PATH;
-	table = load Table Table->PATH;
+	table = load Tables Tables->PATH;
 	mrutil = load MRUtil MRUtil->PATH;
-	job = load Job Job->PATH;
+	jobmodule = load Jobs Jobs->PATH;
 	logger = load Logger Logger->PATH;
 
-	bjob->init();
+	jobmodule->init();
 
 	mrutil->init();
 	
 	logger->init();
 	logger->setFileName("log_jobtracker");
 
-	jobs = Table->Table[ref Job].new(100, nil);
-	taskTrackers = Table->StrHash[ref TaskTrackerInfo].new(100, nil);
+	jobs = Tables->Table[ref Job].new(100, nil);
+	taskTrackers = Tables->Strhash[ref TaskTrackerInfo].new(100, nil);
 
 }
 
@@ -54,7 +55,7 @@ submitJob(config : ref JobConfig) : int
 		logger->scrlog("SubmitJob failed, try to submit a nil job!", Logger->ERROR);
 		return -1;
 	}
-	newjob := ref Job(maxJobId++, config, MRUtil->INIT, nil, nil);
+	newjob := Job.new(config);
 	jobs.add(newjob.id, newjob);
 	logger->logInfo("Submit new job, id:" + string newjob.id + "name:" + newjob.config.name);
 	logger->scrlogInfo("Submit new job, id:" + string newjob.id + "name:" + newjob.config.name);
@@ -71,8 +72,12 @@ startJob(id : int) : int
 	}
 	produceMapper(job);	
 	produceReducer(job);
-	for (p := job.mapperTasks; p != nil; p = tl p) 
-		shootMapper(hd p);
+	mapper : ref MRUtil->MapperTask;
+	for (i := 0; i < len job.mapperTasks.items; i++)
+		for (p := job.mapperTasks.items[i]; p != nil; p = tl p) {
+			(nil, mapper) = hd p;
+			shootMapper(mapper);
+		}
 	logger->logInfo("Start job:" + string id);
 	logger->scrlogInfo("Start job:" + string id);
 	return 0;
@@ -80,7 +85,7 @@ startJob(id : int) : int
 
 updateTaskTrackers(taskTracker : ref TaskTrackerInfo) : int
 {
-	if (TaskTrackerInfo == nil) {
+	if (taskTracker == nil) {
 		logger->log("UpdateTaskTracker failed, new tracker is nil!", Logger->ERROR);
 		logger->scrlog("UpdateTaskTracker failed, new tracker is nil!", Logger->ERROR);
 		return -1;
@@ -109,22 +114,27 @@ produceReducer(job : ref Job)
 
 shootMapper(mapper : ref MapperTask) : int 
 {
+	return 0;
 }
 
 mapperSucceed(jobId : int, taskId : int) : int
 {
+	return 0;
 }
 
 reducerSucceed(jobId : int, taskId : int) : int
 {
+	return 0;
 }
 
 mapperFailed(jobId : int, taskId : int) : int
 {
+	return 0;
 }
 
 reducerFailed(jobId : int, taskId : int) : int
 {
+	return 0;
 }
 
 
