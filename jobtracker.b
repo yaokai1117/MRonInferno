@@ -3,15 +3,18 @@ implement JobTracker;
 include "sys.m";
 include "jobtracker.m";
 include "mrutil.m";
+include "jobs.m";
+include "ioutil.m";
+
 include "tables.m";
 include "logger.m";
-include "jobs.m";
 
 Job : import jobmodule;
 JobConfig : import jobmodule;
 MapperTask : import mrutil;
 ReducerTask : import mrutil;
 TaskTrackerInfo : import mrutil;
+FileBlock : import ioutil;
 Table : import table;
 Strhash : import table;
 
@@ -20,9 +23,14 @@ table : Tables;
 mrutil : MRUtil;
 jobmodule : Jobs;
 logger : Logger;
+ioutil : IOUtil;
 
 
 #implementation of functions of module JobTracker 
+
+INF : con 100000;
+
+maxTaskId : int;
 
 jobs : ref Tables->Table[ref Job];
 taskTrackers : ref Tables->Strhash[ref TaskTrackerInfo];
@@ -35,14 +43,17 @@ init()
 	mrutil = load MRUtil MRUtil->PATH;
 	jobmodule = load Jobs Jobs->PATH;
 	logger = load Logger Logger->PATH;
+	ioutil = load IOUtil IOUtil->PATH;
 
 	jobmodule->init();
 
 	mrutil->init();
+	ioutil->init();
 	
 	logger->init();
 	logger->setFileName("log_jobtracker");
 
+	maxTaskId = 0;
 	jobs = Tables->Table[ref Job].new(100, nil);
 	taskTrackers = Tables->Strhash[ref TaskTrackerInfo].new(100, nil);
 
@@ -70,14 +81,17 @@ startJob(id : int) : int
 		logger->scrlog("StartJob failed, no such job!", Logger->ERROR);
 		return -1;
 	}
-	produceMapper(job);	
-	produceReducer(job);
+	if (produceMapper(job) != 0)
+		return -1;	
+	if (produceReducer(job) != 0)
+		return -1;;
 	mapper : ref MRUtil->MapperTask;
 	for (i := 0; i < len job.mapperTasks.items; i++)
 		for (p := job.mapperTasks.items[i]; p != nil; p = tl p) {
 			(nil, mapper) = hd p;
 			shootMapper(mapper);
 		}
+	job.status = MRUtil->PENDING;
 	logger->logInfo("Start job:" + string id);
 	logger->scrlogInfo("Start job:" + string id);
 	return 0;
@@ -104,13 +118,69 @@ updateTaskTrackers(taskTracker : ref TaskTrackerInfo) : int
 	return 0;
 }
 
-produceMapper(job : ref Job)
+getTaskTracker() : ref TaskTrackerInfo
 {
+	ret : ref TaskTrackerInfo;
+	minNum := INF;
+	for (i := 0; i < len taskTrackers.items; i++)
+		for (p := taskTrackers.items[i]; p != nil; p = tl p){
+			(nil, tt) := hd p;
+			if (tt.mapperTaskNum + tt.reducerTaskNum < minNum) {
+				ret = tt;
+				minNum = tt.mapperTaskNum + tt.reducerTaskNum;
+			}
+		}
+	if (minNum == INF) {
+		logger->log("GetTaskTracker failed: no tasktracker available!", Logger->ERROR);
+		logger->scrlog("GetTaskTracker failed: no tasktracker available!", Logger->ERROR);
+		return nil;
+	}
+	return ret;
 }
 
-produceReducer(job : ref Job)
+produceMapper(job : ref Job) : int
 {
+	fileName := job.config.inputFile;
+	mapperAmount := job.config.mapperAmount;
+	fileBlocks := ioutil->split(fileName, mapperAmount);
+	job.config.mapperAmount = mapperAmount = len fileBlocks;
+	for (p := fileBlocks; p != nil; p = tl p) {
+		taskTracker := getTaskTracker();
+		if (taskTracker == nil) {
+			job.status = MRUtil->FAILED;
+			logger->log("Produce mapper failed! No available taskTracker!", Logger->ERROR);
+			logger->scrlog("Produce mapper failed! No available taskTracker!", Logger->ERROR);
+			return -1;
+		}
+		task := ref MapperTask(maxTaskId++, job.id, MRUtil->PENDING, 1, taskTracker.addr, taskTracker.port, job.config.mrClassName, job.config.reducerAmount);
+		job.mapperTasks.add(task.id, task);
+	}
+	return 0;
 }
+
+produceReducer(job : ref Job) : int
+{
+	reducerAmount := job.config.reducerAmount;
+	for (i := 0; i < reducerAmount; i++) {
+		taskTracker := getTaskTracker();
+		if (taskTracker == nil) {
+			job.status = MRUtil->FAILED;
+			logger->log("Produce reducer failed! No available taskTracker!", Logger->ERROR);
+			logger->scrlog("Produce reducer failed! No available taskTracker!", Logger->ERROR);
+			return -1;
+		}
+		task := ref ReducerTask(maxTaskId++, job.id, MRUtil->PENDING, 1, taskTracker.addr, taskTracker.port, job.config.mrClassName, job.config.outputFile, job.config.outputRep, job.config.outputSize, job.config.mapperAmount, i);
+		job.reducerTasks.add(task.id, task);
+	}
+	return 0;
+}
+
+### debug
+getJob(id : int) : ref Job
+{
+	return jobs.find(id);
+}
+###
 
 shootMapper(mapper : ref MapperTask) : int 
 {

@@ -29,10 +29,11 @@ Jobs : module {
 
 		JobConfig : adt {
 			name : string;
+			mrClassName : string;
 			inputFile : string;
 			outputFile : string;
 			outputRep : int;
-			outputBlockSize : int;
+			outputSize : int;
 			mapperAmount : int;
 			reducerAmount : int;
 			maxAttemptNum : int;

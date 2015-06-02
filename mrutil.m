@@ -13,9 +13,9 @@ MRUtil : module {
 		jobId : int;
 		status : int;		
 		attemptCount : int;
-		taskTrackerName : string;
+		taskTrackerAddr : string;
+		taskTrackerPort : int;
 		mrClassName : string;
-		outputDir : string;
 
 		toString : fn(mp : self ref MapperTask) : string;
 
@@ -33,16 +33,15 @@ MRUtil : module {
 		taskTrackerAddr : string;
 		taskTrackerPort : int;
 		mrClassName : string;
-		outputDir : string;
 
 		toString : fn(rd : self ref ReducerTask) : string;
 
 		# reducer
 		outputFile : string;
-		partitionIndex : int;
+		outputRep : int;
+		outputSize : int;
 		mapperAmount : int;
-		replicas : int;
-		lineCount : int;
+		partitionIndex : int;
 	};
 
 	TaskTrackerInfo : adt {

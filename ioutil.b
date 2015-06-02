@@ -2,10 +2,10 @@ implement IOUtil;
 
 include "sys.m";
 include "ioutil.m";
-include "filelogger.m";
+#include "filelogger.m";
 
 sys : Sys;
-filelogger : FileLogger;
+#filelogger : FileLogger;
 
 Connection : import sys;
 FD : import sys;
@@ -29,7 +29,7 @@ sendRemoteFile(port : int, fd : ref FD)
 
 	(n, c) := sys->announce("tcp!*!" + string port);
 	if (n < 0) {
-		filelogger->log("Error:IOUtil->sendRemoteFile: announce failed %r\n");
+#		filelogger->log("Error:IOUtil->sendRemoteFile: announce failed %r\n");
 		exit;
 	}
 
@@ -39,7 +39,7 @@ sendRemoteFile(port : int, fd : ref FD)
 
 		(ok, conn) := sys->listen(c);
 		if (ok < 0) {
-			filelogger->log("Error:IOUtil->sendRemoteFile: listen failed %r\n");
+#			filelogger->log("Error:IOUtil->sendRemoteFile: listen failed %r\n");
 			exit;
 		}
 
@@ -64,7 +64,7 @@ getRemoteFile(addr : string, port : int, destPath : string) : ref FD
 	(ok, conn) := sys->dial("tcp!" + addr + "!" + string port, nil);
 	if (ok < 0)
 	{
-		filelogger->log("Error:IOUtil->getRemoteFile--dial failed %r\n");
+#		filelogger->log("Error:IOUtil->getRemoteFile--dial failed %r\n");
 		return nil;
 	}
 
