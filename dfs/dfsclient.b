@@ -7,13 +7,14 @@ include "dfsclient.m";
 include "xmlhandle.m";
 include "xml.m";
 include "bufio.m";
-
+include "lists.m";
 
 sys : Sys;
 dfsutil : DFSUtil;
 
 xml : Xml;
 xmlhd : XmlHandle;
+lists : Lists;
 
 DFSFile : import dfsutil;
 DFSChunk : import dfsutil;
@@ -28,7 +29,9 @@ defaultRep : int;
 defaultChunkSize : int;
 defaultTempPath : string;
 
-conn : Connection; init() { if (sys == nil)
+conn : Connection;
+init() { 
+	if (sys == nil)
 		sys = load Sys Sys->PATH;
 	if (dfsutil == nil)
 		dfsutil = load DFSUtil DFSUtil->PATH;
@@ -36,15 +39,21 @@ conn : Connection; init() { if (sys == nil)
 		xml = load Xml Xml->PATH;
 	if (xmlhd == nil)
 		xmlhd = load XmlHandle XmlHandle->PATH;
+	if (lists == nil)
+		lists = load Lists Lists->PATH;
 
 	xml->init();
 	dfsutil->init();
 
+	#masterAddr = "192.168.43.216";
+	#masterPort = 2333;
+
 	masterAddr = "127.0.0.1";
 	masterPort = 2333;
+
 	defaultRep = 3;
 	defaultChunkSize = 1<<20;
-	defaultTempPath = "/usr/yaokai/cli/";
+	defaultTempPath = "/usr/fyabc/cli/";
 
 	ok : int;
 	(ok, conn) = sys->dial("tcp!" + masterAddr + "!" + string masterPort, nil);
@@ -228,11 +237,61 @@ deleteChunk(chunk : ref DFSChunk) : int
 
 lineOffset(fileName : string) : array of big
 {
-	return nil;
+	file := getFile(fileName);
+	offsets : list of big;
+
+	chunk : ref DFSChunk;
+	for(p := file.chunks; p != nil; p = tl p)
+	{
+		chunk = hd p;
+		chunkOffsets := lineOffsetChunk(chunk);
+
+		for(i := 0; i < len chunkOffsets; i++)
+		{
+			offsets = chunkOffsets[i] :: offsets;
+		}
+	}
+
+	length := len offsets;
+	ret := array[length] of big;
+	for(j := length-1; j>=0; j--)
+	{
+		ret[j] = hd offsets;
+		offsets = tl offsets;
+	}
+	return ret;
 }
 
 lineOffsetChunk(chunk : ref DFSChunk) : array of big
 {
+	node : ref DFSNode;
+
+	for(p := chunk.nodes; p != nil; p = tl p)
+	{
+		node = hd p;
+		(ok, conn) := sys->dial("tcp!" + node.addr + "!" + string node.port, nil);
+		if (ok >= 0)
+		{
+			msg := "lineos@" + string chunk.id;
+			sys->fprint(conn.dfd, "%s", msg);
+
+			buf := array [Sys->ATOMICIO] of byte;
+			length := sys->read(conn.dfd, buf, len buf);
+			(nil,chunkOffsets) := sys->tokenize(string buf[:length], " ") ;
+			sys->print("%d\n",len chunkOffsets);
+			ret := array[len chunkOffsets] of big;
+
+			for(i :=0; i< len ret; i++)
+			{
+				ret[i] = big (hd chunkOffsets) + chunk.offset;
+				chunkOffsets = tl chunkOffsets;
+			}
+
+			return ret;
+		}
+	}
+
+	sys->print("All nodes of this chunk %d are failed to lineOffset!", chunk.id);
 	return nil;
 }
 
