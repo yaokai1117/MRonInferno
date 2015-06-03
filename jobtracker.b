@@ -17,6 +17,7 @@ TaskTrackerInfo : import mrutil;
 FileBlock : import ioutil;
 Table : import table;
 Strhash : import table;
+Connection : import sys;
 
 sys : Sys;
 table : Tables;
@@ -184,30 +185,121 @@ getJob(id : int) : ref Job
 
 shootMapper(mapper : ref MapperTask) : int 
 {
+	(ok, conn) := sys->dial("tcp!" + mapper.taskTrackerAddr + "!" + string mapper.taskTrackerPort, nil);
+	if (ok < 0) {
+		logger->log("ShootMapper failed, dial failed!", Logger->ERROR);
+		logger->scrlog("ShootMapper failed, dial failed!", Logger->ERROR);
+		return -1;
+	}
+
+	msg := "mapper@" + string mapper.id + "@" + string mapper.jobId +
+			"@" + string mapper.status + "@" + string mapper.attemptCount + 
+			"@" + mapper.mrClassName + 
+			"@" + mapper.inputFileBlock.fileName + "@" + string mapper.inputFileBlock.offset + "@" + string mapper.inputFileBlock.size;
+	sys->fprint(conn.dfd, "%s", msg);
+
+	buf := array [Sys->ATOMICIO] of byte;
+	length := sys->read(conn.dfd, buf, len buf);
+	ok = int string buf[:1];
+	if (length == 0 || ok != 0) {
+		logger->log("ShootMapper failed, feedback error!", Logger->ERROR);
+		logger->scrlog("ShootMapper failed, feedback error!", Logger->ERROR);
+		return -1;
+	}	
+
 	return 0;
 }
 
-mapperSucceed(jobId : int, taskId : int) : int
+shootReducer(reducer : ref ReducerTask, mapperFilePort : int) : int
+{
+	(ok, conn) := sys->dial("tcp!" + reducer.taskTrackerAddr + "!" + string reducer.taskTrackerPort, nil);
+	if (ok < 0) {
+		logger->log("ShootReducer failed, dial failed!", Logger->ERROR);
+		logger->scrlog("ShootReducer failed, dial failed!", Logger->ERROR);
+		return -1;
+	}
+
+	msg := "reducer@" + string reducer.id + "@" + string reducer.jobId + 
+			 "@" + string reducer.status + "@" + string reducer.attemptCount + 
+			 "@" + reducer.mrClassName + 
+			 "@" + reducer.outputFile + "@" + string reducer.outputRep + "@" + string reducer.outputSize + "@" + string mapperFilePort;
+	sys->fprint(conn.dfd, "%s", msg);
+
+	buf := array [Sys->ATOMICIO] of byte;
+	length := sys->read(conn.dfd, buf, len buf);
+	ok = int string buf[:1];
+	if (length == 0 || ok != 0) {
+		logger->log("ShootReducer failed, feedback error!", Logger->ERROR);
+		logger->scrlog("ShootReducer failed, feedback error!", Logger->ERROR);
+		return -1;
+	}
+
+	return 0;
+}
+
+mapperSucceed(task : ref MapperTask, mapperFilePort : int) : int
 {
 	return 0;
 }
 
-reducerSucceed(jobId : int, taskId : int) : int
+reducerSucceed(task : ref ReducerTask) : int
 {
 	return 0;
 }
 
-mapperFailed(jobId : int, taskId : int) : int
+mapperFailed(task : ref MapperTask) : int
 {
 	return 0;
 }
 
-reducerFailed(jobId : int, taskId : int) : int
+reducerFailed(task : ref ReducerTask) : int
 {
 	return 0;
 }
 
+isRightMapper(task : MapperTask) : int
+{
+	job := jobs.find(task.jobId);
+	if (job == nil)
+		return 0;
+	if (job.getStatus() != MRUtil->PENDING)
+		return 0;
 
+	localTask := job.getMapper(task.id);
+	if (localTask == nil)
+		return 0;
+	if (localTask.status != MRUtil->PENDING)
+		return 0;
+	if ((localTask.taskTrackerAddr + string localTask.taskTrackerPort)
+			!= (task.taskTrackerAddr + string task.taskTrackerPort))
+		return 0;
+	if (localTask.attemptCount != task.attemptCount)
+		return 0;
+
+	return 1;
+}
+
+isRightReducer(task : ReducerTask) : int
+{
+	job := jobs.find(task.jobId);
+	if (job == nil)
+		return 0;
+	if (job.getStatus() != MRUtil->PENDING)
+		return 0;
+
+	localTask := job.getReducer(task.id);
+	if (localTask == nil)
+		return 0;
+	if (localTask.status != MRUtil->PENDING)
+		return 0;
+	if ((localTask.taskTrackerAddr + string localTask.taskTrackerPort)
+			!= (task.taskTrackerAddr + string task.taskTrackerPort))
+		return 0;
+	if (localTask.attemptCount != task.attemptCount)
+		return 0;
+
+	return 1;
+}
 
 
 
