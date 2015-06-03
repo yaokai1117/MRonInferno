@@ -4,12 +4,12 @@ IOUtil : module{
 	FileBlock : adt{
 		fileName : string;
 		offset : big;
-		size : big;
+		size : int;
 	};
 
 	init : fn();
 
-	split : fn(fileName : string, number : int) : list of FileBlock;
+	split : fn(fileName : string, number : int) : list of ref FileBlock;
 	#//split the dfsFile into fileBlocks
 
 	sendRemoteFile : fn(port : int, fd : ref Sys->FD);

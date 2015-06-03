@@ -152,7 +152,7 @@ produceMapper(job : ref Job) : int
 			logger->scrlog("Produce mapper failed! No available taskTracker!", Logger->ERROR);
 			return -1;
 		}
-		task := ref MapperTask(maxTaskId++, job.id, MRUtil->PENDING, 1, taskTracker.addr, taskTracker.port, job.config.mrClassName, job.config.reducerAmount);
+		task := ref MapperTask(maxTaskId++, job.id, MRUtil->PENDING, 1, taskTracker.addr, taskTracker.port, job.config.mrClassName, hd p, job.config.reducerAmount);
 		job.mapperTasks.add(task.id, task);
 	}
 	return 0;

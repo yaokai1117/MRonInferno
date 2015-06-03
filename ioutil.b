@@ -2,22 +2,49 @@ implement IOUtil;
 
 include "sys.m";
 include "ioutil.m";
-#include "filelogger.m";
+include "logger.m";
+include "dfsclient.m";
+include "dfsutil.m";
+include "lists.m";
+
 
 sys : Sys;
-#filelogger : FileLogger;
+logger : Logger;
+dfsutil : DFSUtil;
+dfsclient : DFSClient;
+lists : Lists;
 
 Connection : import sys;
 FD : import sys;
+DFSFile : import dfsutil;
+DFSChunk : import dfsutil;
 
 init()
 {
 	sys = load Sys Sys->PATH;
+	dfsutil = load DFSUtil DFSUtil->PATH;
+	dfsclient = load DFSClient DFSClient->PATH;
+	lists = load Lists Lists->PATH;
 }
 
-split(fileName : string, number : int) : list of FileBlock
+split(fileName : string, number : int) : list of ref FileBlock
 {
-	return nil;
+	ret : list of ref FileBlock;
+	dfsclient->init();
+	file := dfsclient->getFile(fileName);
+	tSize := big (lists->last(file.chunks)).size + (lists->last(file.chunks)).offset;
+	size := int (tSize / big number) + 1;
+	offset := big 0;
+	for (i := 0; i < number; i++) {
+		fb : ref FileBlock;
+		if (i < number - 1)
+			fb = ref FileBlock(fileName, offset, size);
+		else
+			fb = ref FileBlock(fileName, offset, int (tSize - offset));
+		ret = fb :: ret;	
+		offset += big size;
+	}
+	return ret;
 }
 
 sendRemoteFile(port : int, fd : ref FD)
@@ -29,7 +56,8 @@ sendRemoteFile(port : int, fd : ref FD)
 
 	(n, c) := sys->announce("tcp!*!" + string port);
 	if (n < 0) {
-#		filelogger->log("Error:IOUtil->sendRemoteFile: announce failed %r\n");
+		logger->log("IOUtil->sendRemoteFile: announce failed %r\n", Logger->ERROR);
+		logger->scrlog("IOUtil->sendRemoteFile: announce failed %r\n", Logger->ERROR);
 		exit;
 	}
 
@@ -39,7 +67,8 @@ sendRemoteFile(port : int, fd : ref FD)
 
 		(ok, conn) := sys->listen(c);
 		if (ok < 0) {
-#			filelogger->log("Error:IOUtil->sendRemoteFile: listen failed %r\n");
+			logger->log("IOUtil->sendRemoteFile: listen failed %r\n", Logger->ERROR);
+			logger->scrlog("IOUtil->sendRemoteFile: listen failed %r\n", Logger->ERROR);
 			exit;
 		}
 
@@ -64,7 +93,8 @@ getRemoteFile(addr : string, port : int, destPath : string) : ref FD
 	(ok, conn) := sys->dial("tcp!" + addr + "!" + string port, nil);
 	if (ok < 0)
 	{
-#		filelogger->log("Error:IOUtil->getRemoteFile--dial failed %r\n");
+		logger->log("IOUtil->getRemoteFile--dial failed %r\n", Logger->ERROR);
+		logger->scrlog("IOUtil->getRemoteFile--dial failed %r\n", Logger->ERROR);
 		return nil;
 	}
 

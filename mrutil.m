@@ -20,7 +20,7 @@ MRUtil : module {
 		toString : fn(mp : self ref MapperTask) : string;
 
 		# mapper
-#		inputFileBlock : ref IOUtil->FileBlock;
+		inputFileBlock : ref IOUtil->FileBlock;
 		reducerAmount : int;
 	};
 

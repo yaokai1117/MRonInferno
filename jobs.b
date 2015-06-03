@@ -4,6 +4,7 @@ include "jobs.m";
 include "sys.m";
 include "tables.m";
 include "mrutil.m";
+include "ioutil.m";
 
 MapperTask : import mrutil;
 ReducerTask : import mrutil;
