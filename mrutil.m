@@ -18,6 +18,7 @@ MRUtil : module {
 		mrClassName : string;
 
 		toString : fn(mp : self ref MapperTask) : string;
+		eq : fn(a, b : ref MapperTask) : int;				   
 
 		# mapper
 		inputFileBlock : ref IOUtil->FileBlock;
@@ -35,6 +36,7 @@ MRUtil : module {
 		mrClassName : string;
 
 		toString : fn(rd : self ref ReducerTask) : string;
+		eq : fn(a, b : ref ReducerTask) : int;				   
 
 		# reducer
 		outputFile : string;
@@ -49,6 +51,7 @@ MRUtil : module {
 		port : int;
 		mapperTaskNum : int;
 		reducerTaskNum : int;
+		isWorking : int;
 
 		toString : fn(tt : self ref TaskTrackerInfo) : string;
 	};

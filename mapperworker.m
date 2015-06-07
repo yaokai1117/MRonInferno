@@ -1,14 +1,11 @@
 MapperWorker : module {
-	PATH : con "/usr/fyabc/mapperworker.dis";
+	PATH : con "/usr/yaokai/mapperworker.dis";
 
-	init : fn();
+	init : fn(mapperTask : ref MRUtil->MapperTask);
 
-	#//There is a method that load the remote class(MR Instance).
-	newMRInstance : fn() : ref MRUtil->MapReduce;
+	run : fn(mapperTask : ref MRUtil->MapperTask);
 
-	run : fn();
+	collect : fn() : ref IOUtil->OutputCollector;
 
-	collect : fn() : ref MRUtil->OutPutCollector;
-
-	saveToLocal : fn(collector : ref MRUtil->OutPutCollector);
+	saveToLocal : fn(mapperTask : ref MRUtil->MapperTask, collector : ref IOUtil->OutputCollector);
 };

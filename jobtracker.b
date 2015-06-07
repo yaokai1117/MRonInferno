@@ -7,6 +7,7 @@ include "jobs.m";
 include "ioutil.m";
 
 include "tables.m";
+include "lists.m";
 include "logger.m";
 
 Job : import jobmodule;
@@ -25,22 +26,30 @@ mrutil : MRUtil;
 jobmodule : Jobs;
 logger : Logger;
 ioutil : IOUtil;
+lists : Lists;
 
 
 #implementation of functions of module JobTracker 
+
+TaskTracker : adt {
+	info : ref TaskTrackerInfo;
+	mappers : list of ref MapperTask;
+	reducers : list of ref ReducerTask;
+};
 
 INF : con 100000;
 
 maxTaskId : int;
 
 jobs : ref Tables->Table[ref Job];
-taskTrackers : ref Tables->Strhash[ref TaskTrackerInfo];
+taskTrackers : ref Tables->Strhash[ref TaskTracker];
 
 
 init()
 {
 	sys = load Sys Sys->PATH;
 	table = load Tables Tables->PATH;
+	lists = load Lists Lists->PATH;	
 	mrutil = load MRUtil MRUtil->PATH;
 	jobmodule = load Jobs Jobs->PATH;
 	logger = load Logger Logger->PATH;
@@ -56,7 +65,7 @@ init()
 
 	maxTaskId = 0;
 	jobs = Tables->Table[ref Job].new(100, nil);
-	taskTrackers = Tables->Strhash[ref TaskTrackerInfo].new(100, nil);
+	taskTrackers = Tables->Strhash[ref TaskTracker].new(100, nil);
 
 }
 
@@ -98,37 +107,38 @@ startJob(id : int) : int
 	return 0;
 }
 
-updateTaskTrackers(taskTracker : ref TaskTrackerInfo) : int
+updateTaskTrackers(taskTrackerInfo : ref TaskTrackerInfo) : int
 {
-	if (taskTracker == nil) {
+	if (taskTrackerInfo == nil) {
 		logger->log("UpdateTaskTracker failed, new tracker is nil!", Logger->ERROR);
 		logger->scrlog("UpdateTaskTracker failed, new tracker is nil!", Logger->ERROR);
 		return -1;
 	}
-	oldTaskTracker := taskTrackers.find(taskTracker.addr + "!" + string taskTracker.port);
+	oldTaskTracker := taskTrackers.find(taskTrackerInfo.addr + "!" + string taskTrackerInfo.port);
 	if (oldTaskTracker == nil)
-		taskTrackers.add(taskTracker.addr + string taskTracker.port, taskTracker);
+		taskTrackers.add(taskTrackerInfo.addr + string taskTrackerInfo.port, ref TaskTracker(taskTrackerInfo, nil, nil));
 	else {
-		oldTaskTracker.addr = taskTracker.addr;
-		oldTaskTracker.port = taskTracker.port;
-		oldTaskTracker.mapperTaskNum = taskTracker.mapperTaskNum;
-		oldTaskTracker.reducerTaskNum = taskTracker.reducerTaskNum;
+		oldTaskTracker.info.addr = taskTrackerInfo.addr;
+		oldTaskTracker.info.port = taskTrackerInfo.port;
+		oldTaskTracker.info.mapperTaskNum = taskTrackerInfo.mapperTaskNum;
+		oldTaskTracker.info.reducerTaskNum = taskTrackerInfo.reducerTaskNum;
+		oldTaskTracker.info.isWorking = taskTrackerInfo.isWorking;
 	}
-	logger->logInfo("UpdateTaskTracker: " + taskTracker.addr + string taskTracker.port + "!"); 
-	logger->scrlogInfo("UpdateTaskTracker: " + taskTracker.addr + string taskTracker.port + "!"); 
+	logger->logInfo("UpdateTaskTracker: " + taskTrackerInfo.addr + string taskTrackerInfo.port + "!"); 
+	logger->scrlogInfo("UpdateTaskTracker: " + taskTrackerInfo.addr + string taskTrackerInfo.port + "!"); 
 	return 0;
 }
 
-getTaskTracker() : ref TaskTrackerInfo
+getTaskTracker() : ref TaskTracker
 {
-	ret : ref TaskTrackerInfo;
+	ret : ref TaskTracker;
 	minNum := INF;
 	for (i := 0; i < len taskTrackers.items; i++)
 		for (p := taskTrackers.items[i]; p != nil; p = tl p){
-			(nil, tt) := hd p;
-			if (tt.mapperTaskNum + tt.reducerTaskNum < minNum) {
-				ret = tt;
-				minNum = tt.mapperTaskNum + tt.reducerTaskNum;
+			(nil, taskTracker) := hd p;
+			if (taskTracker.info.isWorking == 1 && taskTracker.info.mapperTaskNum + taskTracker.info.reducerTaskNum < minNum) {
+				ret = taskTracker;
+				minNum = taskTracker.info.mapperTaskNum + taskTracker.info.reducerTaskNum;
 			}
 		}
 	if (minNum == INF) {
@@ -153,7 +163,9 @@ produceMapper(job : ref Job) : int
 			logger->scrlog("Produce mapper failed! No available taskTracker!", Logger->ERROR);
 			return -1;
 		}
-		task := ref MapperTask(maxTaskId++, job.id, MRUtil->PENDING, 1, taskTracker.addr, taskTracker.port, job.config.mrClassName, hd p, job.config.reducerAmount);
+		taskTracker.info.mapperTaskNum++;
+		task := ref MapperTask(maxTaskId++, job.id, MRUtil->PENDING, 1, taskTracker.info.addr, taskTracker.info.port, job.config.mrClassName, hd p, job.config.reducerAmount);
+		taskTracker.mappers = task :: taskTracker.mappers;
 		job.mapperTasks.add(task.id, task);
 	}
 	return 0;
@@ -170,7 +182,9 @@ produceReducer(job : ref Job) : int
 			logger->scrlog("Produce reducer failed! No available taskTracker!", Logger->ERROR);
 			return -1;
 		}
-		task := ref ReducerTask(maxTaskId++, job.id, MRUtil->PENDING, 1, taskTracker.addr, taskTracker.port, job.config.mrClassName, job.config.outputFile, job.config.outputRep, job.config.outputSize, job.config.mapperAmount, i);
+		taskTracker.info.reducerTaskNum++;
+		task := ref ReducerTask(maxTaskId++, job.id, MRUtil->PENDING, 1, taskTracker.info.addr, taskTracker.info.port, job.config.mrClassName, job.config.outputFile, job.config.outputRep, job.config.outputSize, job.config.mapperAmount, i);
+		taskTracker.reducers = task :: taskTracker.reducers;
 		job.reducerTasks.add(task.id, task);
 	}
 	return 0;
@@ -239,25 +253,89 @@ shootReducer(reducer : ref ReducerTask, mapperFilePort : int) : int
 
 mapperSucceed(task : ref MapperTask, mapperFilePort : int) : int
 {
+	if (!isRightMapper(task))
+		return -1;
+	job := jobs.find(task.jobId);
+	localTask := job.getMapper(task.id);
+	localTask.status = MRUtil->SUCCESS;
+	for (i := 0; i < len job.reducerTasks.items; i++)
+		for (p := job.reducerTasks.items[i]; p != nil; p = tl p) {
+			(nil, reducer) := hd p;
+			shootReducer(reducer, mapperFilePort);
+		}
 	return 0;
 }
 
 reducerSucceed(task : ref ReducerTask) : int
 {
+	if (!isRightReducer(task))
+		return -1;
+	job := jobs.find(task.jobId);
+	localTask := job.getReducer(task.id);
+	localTask.status = MRUtil->SUCCESS;
 	return 0;
 }
 
 mapperFailed(task : ref MapperTask) : int
 {
+	if (!isRightMapper(task))
+		return -1;
+	job := jobs.find(task.jobId);
+	localTask := job.getMapper(task.id);
+	taskTracker := taskTrackers.find(localTask.taskTrackerAddr + string localTask.taskTrackerPort);
+	if (taskTracker != nil)
+		taskTracker.info.isWorking = 0;
+	if (localTask.attemptCount > job.config.maxAttemptNum || changeMapperTaskTracker(task) != 0) {
+		logger->log("Mapper task " + string localTask.id + " failed! Job: " + string job.id, Logger->ERROR);
+		logger->scrlog("Mapper task " + string localTask.id + " failed! Job : " + string job.id, Logger->ERROR);
+		localTask.status = MRUtil->FAILED;	
+	}
+	else {
+		logger->log("Mapper task " + string task.id + "change taskTracker!, the origin tasktracker was " + localTask.taskTrackerAddr + string localTask.taskTrackerPort, Logger->WARN);		
+		logger->scrlog("Mapper task " + string task.id + "change taskTracker!, the origin tasktracker was " + localTask.taskTrackerAddr + string localTask.taskTrackerPort, Logger->WARN);		
+		localTask.status = MRUtil->PENDING;
+		localTask.attemptCount++;
+		shootMapper(localTask);
+	}
 	return 0;
 }
 
 reducerFailed(task : ref ReducerTask) : int
 {
+
 	return 0;
 }
 
-isRightMapper(task : MapperTask) : int
+changeMapperTaskTracker(task : ref MRUtil->MapperTask) : int
+{
+	oldTaskTracker := taskTrackers.find(task.taskTrackerAddr + string task.taskTrackerPort);
+	taskTracker := getTaskTracker();
+	job := jobs.find(task.jobId);
+	if (taskTracker == nil) {
+		job.status = MRUtil->FAILED;
+		logger->log("Change mapper taskTracker failed! No available taskTracker!", Logger->ERROR);
+		logger->scrlog("Change mapper taskTracker failed! No available taskTracker!", Logger->ERROR);
+		return -1;
+	}
+
+	taskTracker.info.mapperTaskNum++;
+	oldTaskTracker.info.mapperTaskNum--;
+
+	taskTracker.mappers = task :: taskTracker.mappers;
+	oldTaskTracker.mappers = lists->delete(task, oldTaskTracker.mappers);
+
+	task.taskTrackerAddr = taskTracker.info.addr;
+	task.taskTrackerPort = taskTracker.info.port;
+	return 0;
+}
+
+changeReducerTaskTracker(task : ref MRUtil->ReducerTask) : int
+{
+
+	return 0;
+}
+
+isRightMapper(task : ref MapperTask) : int
 {
 	job := jobs.find(task.jobId);
 	if (job == nil)
@@ -279,7 +357,7 @@ isRightMapper(task : MapperTask) : int
 	return 1;
 }
 
-isRightReducer(task : ReducerTask) : int
+isRightReducer(task : ref ReducerTask) : int
 {
 	job := jobs.find(task.jobId);
 	if (job == nil)
