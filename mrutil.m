@@ -21,8 +21,8 @@ MRUtil : module {
 		eq : fn(a, b : ref MapperTask) : int;				   
 
 		# mapper
-		inputFileBlock : ref IOUtil->FileBlock;
 		reducerAmount : int;
+		inputFileBlock : ref IOUtil->FileBlock;
 	};
 
 	ReducerTask : adt{
@@ -39,11 +39,11 @@ MRUtil : module {
 		eq : fn(a, b : ref ReducerTask) : int;				   
 
 		# reducer
+		mapperAmount : int;
+		partitionIndex : int;
 		outputFile : string;
 		outputRep : int;
 		outputSize : int;
-		mapperAmount : int;
-		partitionIndex : int;
 	};
 
 	TaskTrackerInfo : adt {
@@ -56,6 +56,17 @@ MRUtil : module {
 		toString : fn(tt : self ref TaskTrackerInfo) : string;
 	};
 
+	TaskTracker : adt {
+		info : ref TaskTrackerInfo;
+		mappers : list of ref MapperTask;
+		reducers : list of ref ReducerTask;
+	};
+
 
 	init : fn();
+	mapper2msg : fn(mapper : ref MapperTask) : string;
+	reducer2msg : fn(reducer : ref ReducerTask) : string;
+	msg2mapper : fn(msg : list of string) : ref MapperTask;
+	msg2reducer : fn(msg : list of string) : ref ReducerTask;
+
 };

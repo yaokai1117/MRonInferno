@@ -14,10 +14,10 @@ JobTracker : module {
 		produceReducer : fn(job : ref Jobs->Job) : int;
 						 
 		shootMapper : fn(mapper : ref MRUtil->MapperTask) : int;
-		shootReducer : fn(reducer : ref MRUtil->ReducerTask, mapperFilePort : int) : int;
+		shootReducer : fn(reducer : ref MRUtil->ReducerTask, mapperFileAddr : string) : int;
 ######
 		
-		mapperSucceed : fn(task : ref MRUtil->MapperTask, mapperFilePort : int) : int;
+		mapperSucceed : fn(task : ref MRUtil->MapperTask, mapperFileAddr : string) : int;
 		reducerSucceed : fn(task : ref MRUtil->ReducerTask) : int;
 		mapperFailed : fn(task : ref MRUtil->MapperTask) : int;
 		reducerFailed : fn(task : ref MRUtil->ReducerTask) : int;

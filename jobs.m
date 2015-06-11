@@ -1,8 +1,6 @@
 Jobs : module {
 		PATH : con "/usr/yaokai/jobs.dis";
 
-		init : fn();
-
 		Job : adt {
 			id : int;
 			config : ref JobConfig;
@@ -41,4 +39,9 @@ Jobs : module {
 			#functions
 			toString : fn(jc : self ref JobConfig) : string;
 		};
+
+
+		init : fn();
+		jobConfig2msg : fn(config : ref JobConfig) : string;
+		msg2jobConfig : fn(msg : list of string) : ref JobConfig;
 };

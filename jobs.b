@@ -153,6 +153,29 @@ JobConfig.toString(jc : self ref JobConfig) : string
 	return ret;
 }
 
+jobConfig2msg(config : ref JobConfig) : string
+{
+	msg := "jobConfig" + "@" + config.name + "@" + config.mrClassName + 
+			 "@" + config.inputFile + "@" + config.outputFile + 
+			 "@" + string config.outputRep + "@" + string config.outputSize + 
+			 "@" + string config.mapperAmount + "@" + string config.reducerAmount + "@" + string config.maxAttemptNum;
+	return msg;
+}
+
+msg2jobConfig(msg : list of string) : ref JobConfig
+{
+	name := hd tl msg;
+	mrClassName := hd tl msg;
+	inputFile := hd tl msg;
+	outputFile := hd tl msg;
+	outputRep := int (hd tl msg);
+	outputSize := int (hd tl msg);
+	mapperAmount := int (hd tl msg);
+	reducerAmount := int (hd tl msg);
+	maxAttemptNum := int (hd tl msg);
+	return ref JobConfig(name, mrClassName, inputFile, outputFile, outputRep, outputSize, mapperAmount, reducerAmount, maxAttemptNum);
+}
+
 
 
 

@@ -163,7 +163,7 @@ produceMapper(job : ref Job) : int
 			return -1;
 		}
 		taskTracker.info.mapperTaskNum++;
-		task := ref MapperTask(maxTaskId++, job.id, MRUtil->PENDING, 1, taskTracker.info.addr, taskTracker.info.port, job.config.mrClassName, hd p, job.config.reducerAmount);
+		task := ref MapperTask(maxTaskId++, job.id, MRUtil->PENDING, 1, taskTracker.info.addr, taskTracker.info.port, job.config.mrClassName, job.config.reducerAmount, hd p);
 		taskTracker.mappers = task :: taskTracker.mappers;
 		job.mapperTasks.add(task.id, task);
 	}
@@ -182,7 +182,7 @@ produceReducer(job : ref Job) : int
 			return -1;
 		}
 		taskTracker.info.reducerTaskNum++;
-		task := ref ReducerTask(maxTaskId++, job.id, MRUtil->PENDING, 1, taskTracker.info.addr, taskTracker.info.port, job.config.mrClassName, job.config.outputFile, job.config.outputRep, job.config.outputSize, job.config.mapperAmount, i);
+		task := ref ReducerTask(maxTaskId++, job.id, MRUtil->PENDING, 1, taskTracker.info.addr, taskTracker.info.port, job.config.mrClassName, job.config.mapperAmount, i, job.config.outputFile, job.config.outputRep, job.config.outputSize);
 		taskTracker.reducers = task :: taskTracker.reducers;
 		job.reducerTasks.add(task.id, task);
 	}
@@ -205,12 +205,8 @@ shootMapper(mapper : ref MapperTask) : int
 		return -1;
 	}
 
-	msg := "mapper@" + string mapper.id + "@" + string mapper.jobId +
-			"@" + string mapper.status + "@" + string mapper.attemptCount + 
-			"@" + mapper.mrClassName + 
-			"@" + mapper.inputFileBlock.fileName + "@" + string mapper.inputFileBlock.offset + "@" + string mapper.inputFileBlock.size;
-	sys->fprint(conn.dfd, "%s", msg);
-
+	msg := "shootMapper" + "@" + mrutil->mapper2msg(mapper);
+	sys->fprint(conn.dfd, "%s", msg); 
 	buf := array [Sys->ATOMICIO] of byte;
 	length := sys->read(conn.dfd, buf, len buf);
 	ok = int string buf[:1];
@@ -232,10 +228,7 @@ shootReducer(reducer : ref ReducerTask, mapperFileAddr : string) : int
 		return -1;
 	}
 
-	msg := "reducer@" + string reducer.id + "@" + string reducer.jobId + 
-			 "@" + string reducer.status + "@" + string reducer.attemptCount + 
-			 "@" + reducer.mrClassName + 
-			 "@" + reducer.outputFile + "@" + string reducer.outputRep + "@" + string reducer.outputSize + "@" + mapperFileAddr;
+	msg := "shootReducer"  + "@" + mapperFileAddr+ "@" + mrutil->reducer2msg(reducer);
 	sys->fprint(conn.dfd, "%s", msg);
 
 	buf := array [Sys->ATOMICIO] of byte;
