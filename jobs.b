@@ -164,15 +164,16 @@ jobConfig2msg(config : ref JobConfig) : string
 
 msg2jobConfig(msg : list of string) : ref JobConfig
 {
-	name := hd tl msg;
-	mrClassName := hd tl msg;
-	inputFile := hd tl msg;
-	outputFile := hd tl msg;
-	outputRep := int (hd tl msg);
-	outputSize := int (hd tl msg);
-	mapperAmount := int (hd tl msg);
-	reducerAmount := int (hd tl msg);
-	maxAttemptNum := int (hd tl msg);
+	msg = tl msg;
+	name := hd msg; msg = tl msg;
+	mrClassName := hd msg; msg = tl msg;
+	inputFile := hd msg; msg = tl msg;
+	outputFile := hd msg; msg = tl msg;
+	outputRep := int (hd msg); msg = tl msg;
+	outputSize := int (hd msg); msg = tl msg;
+	mapperAmount := int (hd msg); msg = tl msg;
+	reducerAmount := int (hd msg); msg = tl msg;
+	maxAttemptNum := int (hd msg); msg = tl msg;
 	return ref JobConfig(name, mrClassName, inputFile, outputFile, outputRep, outputSize, mapperAmount, reducerAmount, maxAttemptNum);
 }
 

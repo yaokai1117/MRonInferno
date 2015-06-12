@@ -4,31 +4,33 @@ include "sys.m";
 include "tasktracker.m";
 include "ioutil.m";
 include "mrutil.m";
-include "jobs.m";
+
+include "tables.m";
 
 sys : Sys;
 ioutil : IOUtil;
 mrutil : MRUtil;
-jobmodule : Jobs;
 
 MapperTask : import mrutil;
 ReducerTask : import mrutil;
 TaskTrackerInfo : import mrutil;
-TaskTracker : import mrutil;
-Job : import jobmodule;
-JobConfig : import jobmodule;
 
 init()
 {
+	sys = load Sys Sys->PATH;
+	mrutil = load MRUtil MRUtil->PATH;
 }
 
 runMapperTask(mapper : ref MapperTask) : int
 {
+	sys->print("%s\n", mrutil->mapper2msg(mapper));
 	return 0;
 }
 
-runReducerTask(mapper : ref MapperTask, reducer : ref ReducerTask) : int
+runReducerTask(mapperFileAddr : string, reducer : ref ReducerTask) : int
 {
+	sys->print("%s\n", mrutil->reducer2msg(reducer));
 	return 0;
 }
+
 

@@ -119,12 +119,10 @@ updateTaskTrackers(taskTrackerInfo : ref TaskTrackerInfo) : int
 	else {
 		oldTaskTracker.info.addr = taskTrackerInfo.addr;
 		oldTaskTracker.info.port = taskTrackerInfo.port;
-		oldTaskTracker.info.mapperTaskNum = taskTrackerInfo.mapperTaskNum;
-		oldTaskTracker.info.reducerTaskNum = taskTrackerInfo.reducerTaskNum;
 		oldTaskTracker.info.isWorking = taskTrackerInfo.isWorking;
 	}
-	logger->logInfo("UpdateTaskTracker: " + taskTrackerInfo.addr + string taskTrackerInfo.port + "!"); 
-	logger->scrlogInfo("UpdateTaskTracker: " + taskTrackerInfo.addr + string taskTrackerInfo.port + "!"); 
+	logger->logInfo("UpdateTaskTracker: " + taskTrackerInfo.addr + "!" + string taskTrackerInfo.port + "!"); 
+	logger->scrlogInfo("UpdateTaskTracker: " + taskTrackerInfo.addr + "!" + string taskTrackerInfo.port + "!"); 
 	return 0;
 }
 
@@ -162,8 +160,8 @@ produceMapper(job : ref Job) : int
 			logger->scrlog("Produce mapper failed! No available taskTracker!", Logger->ERROR);
 			return -1;
 		}
-		taskTracker.info.mapperTaskNum++;
 		task := ref MapperTask(maxTaskId++, job.id, MRUtil->PENDING, 1, taskTracker.info.addr, taskTracker.info.port, job.config.mrClassName, job.config.reducerAmount, hd p);
+		taskTracker.info.mapperTaskNum++;
 		taskTracker.mappers = task :: taskTracker.mappers;
 		job.mapperTasks.add(task.id, task);
 	}
@@ -181,8 +179,8 @@ produceReducer(job : ref Job) : int
 			logger->scrlog("Produce reducer failed! No available taskTracker!", Logger->ERROR);
 			return -1;
 		}
-		taskTracker.info.reducerTaskNum++;
 		task := ref ReducerTask(maxTaskId++, job.id, MRUtil->PENDING, 1, taskTracker.info.addr, taskTracker.info.port, job.config.mrClassName, job.config.mapperAmount, i, job.config.outputFile, job.config.outputRep, job.config.outputSize);
+		taskTracker.info.reducerTaskNum++;
 		taskTracker.reducers = task :: taskTracker.reducers;
 		job.reducerTasks.add(task.id, task);
 	}
@@ -207,15 +205,7 @@ shootMapper(mapper : ref MapperTask) : int
 
 	msg := "shootMapper" + "@" + mrutil->mapper2msg(mapper);
 	sys->fprint(conn.dfd, "%s", msg); 
-	buf := array [Sys->ATOMICIO] of byte;
-	length := sys->read(conn.dfd, buf, len buf);
-	ok = int string buf[:1];
-	if (length == 0 || ok != 0) {
-		logger->log("ShootMapper failed, feedback error!", Logger->ERROR);
-		logger->scrlog("ShootMapper failed, feedback error!", Logger->ERROR);
-		return -1;
-	}	
-
+	
 	return 0;
 }
 
@@ -231,14 +221,6 @@ shootReducer(reducer : ref ReducerTask, mapperFileAddr : string) : int
 	msg := "shootReducer"  + "@" + mapperFileAddr+ "@" + mrutil->reducer2msg(reducer);
 	sys->fprint(conn.dfd, "%s", msg);
 
-	buf := array [Sys->ATOMICIO] of byte;
-	length := sys->read(conn.dfd, buf, len buf);
-	ok = int string buf[:1];
-	if (length == 0 || ok != 0) {
-		logger->log("ShootReducer failed, feedback error!", Logger->ERROR);
-		logger->scrlog("ShootReducer failed, feedback error!", Logger->ERROR);
-		return -1;
-	}
 	m2rRecord := m2rTable.find(reducer.id);
 	if (m2rRecord == nil) 
 		m2rTable.add(reducer.id, ref MapperFileAddr(mapperFileAddr :: nil));
@@ -251,6 +233,7 @@ mapperSucceed(task : ref MapperTask, mapperFileAddr : string) : int
 {
 	if (!isRightMapper(task))
 		return -1;
+
 	job := jobs.find(task.jobId);
 	localTask := job.getMapper(task.id);
 	localTask.status = MRUtil->SUCCESS;
@@ -259,6 +242,11 @@ mapperSucceed(task : ref MapperTask, mapperFileAddr : string) : int
 			(nil, reducer) := hd p;
 			shootReducer(reducer, mapperFileAddr);
 		}
+
+	taskTracker := taskTrackers.find(localTask.taskTrackerAddr + string localTask.taskTrackerPort);
+	taskTracker.info.mapperTaskNum--;
+	taskTracker.mappers = lists->delete(localTask, taskTracker.mappers);
+
 	return 0;
 }
 
@@ -266,9 +254,15 @@ reducerSucceed(task : ref ReducerTask) : int
 {
 	if (!isRightReducer(task))
 		return -1;
+
 	job := jobs.find(task.jobId);
 	localTask := job.getReducer(task.id);
 	localTask.status = MRUtil->SUCCESS;
+
+	taskTracker := taskTrackers.find(localTask.taskTrackerAddr + string localTask.taskTrackerPort);
+	taskTracker.info.reducerTaskNum--;
+	taskTracker.reducers = lists->delete(localTask, taskTracker.reducers);
+
 	return 0;
 }
 
@@ -286,8 +280,9 @@ mapperFailed(task : ref MapperTask) : int
 		logger->log("Mapper task " + string localTask.id + " failed! Job: " + string job.id, Logger->ERROR);
 		logger->scrlog("Mapper task " + string localTask.id + " failed! Job : " + string job.id, Logger->ERROR);
 		localTask.status = MRUtil->FAILED;	
+		taskTracker.info.mapperTaskNum--;
 		taskTracker.mappers = lists->delete(localTask, taskTracker.mappers);
-		mapperAmountDec(job, localTask);
+#		mapperAmountDec(job, localTask);
 	}
 	else {
 		logger->log("Mapper task " + string localTask.id + "change taskTracker!, the origin tasktracker was " + localTask.taskTrackerAddr + string localTask.taskTrackerPort, Logger->WARN);		
@@ -299,23 +294,23 @@ mapperFailed(task : ref MapperTask) : int
 	return 0;
 }
 
-mapperAmountDec(job : ref Job, failedMapper : ref MapperTask)
-{
-	job.config.mapperAmount--;
-	job.mapperTasks.del(failedMapper.id);
-	for (i := 0; i < len job.reducerTasks.items; i++)
-		for (p := job.reducerTasks.items[i]; p != nil; p = tl p) {
-			(nil, reducer) := hd p;
-			(ok, conn) := sys->dial("tcp!" + reducer.taskTrackerAddr + "!" + string reducer.taskTrackerPort, nil);
-			if (ok < 0) {
-				logger->log("Mapper amount decrease failed, dial failed!", Logger->ERROR);
-				logger->scrlog("Mapper amount decrease failed, dial failed!", Logger->ERROR);
-				return;
-			}	
-			msg := "mapperAmountDec@";
-			sys->fprint(conn.dfd, "%s", msg);
-		}
-}
+#mapperAmountDec(job : ref Job, failedMapper : ref MapperTask)
+#{
+#	job.config.mapperAmount--;
+#	job.mapperTasks.del(failedMapper.id);
+#	for (i := 0; i < len job.reducerTasks.items; i++)
+#		for (p := job.reducerTasks.items[i]; p != nil; p = tl p) {
+#			(nil, reducer) := hd p;
+#			(ok, conn) := sys->dial("tcp!" + reducer.taskTrackerAddr + "!" + string reducer.taskTrackerPort, nil);
+#			if (ok < 0) {
+#				logger->log("Mapper amount decrease failed, dial failed!", Logger->ERROR);
+#				logger->scrlog("Mapper amount decrease failed, dial failed!", Logger->ERROR);
+#				return;
+#			}	
+#			msg := "mapperAmountDec@";
+#			sys->fprint(conn.dfd, "%s", msg);
+#		}
+#}
 
 reducerFailed(task : ref ReducerTask) : int
 {
@@ -329,6 +324,7 @@ reducerFailed(task : ref ReducerTask) : int
 	if (localTask.attemptCount > job.config.maxAttemptNum || changeReducerTaskTracker(localTask) != 0) {
 		logger->log("Reducer task " + string localTask.id + " failed! Job: " + string job.id, Logger->ERROR);
 		logger->scrlog("Reducer task " + string localTask.id + " failed! Job : " + string job.id, Logger->ERROR);
+		taskTracker.info.reducerTaskNum--;
 		taskTracker.reducers = lists->delete(localTask, taskTracker.reducers);
 		localTask.status = MRUtil->FAILED;	
 	}

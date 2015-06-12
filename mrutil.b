@@ -59,36 +59,60 @@ reducer2msg(reducer : ref ReducerTask) : string
 	return msg;
 }
 
+tracker2msg(tracker : ref TaskTrackerInfo) : string
+{
+	msg := "tracker@" + tracker.addr + "@" + string tracker.port + 
+			 "@" + string tracker.mapperTaskNum + "@" + string tracker.reducerTaskNum +
+			 "@" + string tracker.isWorking;
+	return msg;
+}
+
+
 msg2mapper(msg : list of string) : ref MapperTask
 {
-	id := int (hd tl msg);
-	jobId := int (hd tl msg);
-	status := int (hd tl msg);
-	attemptCount := int (hd tl msg);
-	taskTrackerAddr := (hd tl msg);
-	taskTrackerPort := int (hd tl msg);
-	mrClassName := (hd tl msg);
-	reducerAmount := int (hd tl msg);
-	fileName := (hd tl msg);
-	offset := big (hd tl msg);
-	size := int (hd tl msg);
+	msg = tl msg;
+	id := int (hd msg); msg = tl msg;
+	jobId := int (hd msg); msg = tl msg;
+	status := int (hd msg); msg = tl msg;
+	attemptCount := int (hd msg); msg = tl msg;
+	taskTrackerAddr := (hd msg); msg = tl msg;
+	taskTrackerPort := int (hd msg); msg = tl msg;
+	mrClassName := (hd msg); msg = tl msg;
+	reducerAmount := int (hd msg); msg = tl msg;
+	fileName := (hd msg); msg = tl msg;
+	offset := big (hd msg); msg = tl msg;
+	size := int (hd msg); msg = tl msg;
 	fileBlock := ref IOUtil->FileBlock(fileName, offset, size);	
 	return ref MapperTask(id, jobId, status, attemptCount, taskTrackerAddr, taskTrackerPort, mrClassName, reducerAmount, fileBlock);
 }
 
 msg2reducer(msg : list of string) : ref ReducerTask
 {
-	id := int (hd tl msg);
-	jobId := int (hd tl msg);
-	status := int (hd tl msg);
-	attemptCount := int (hd tl msg);
-	taskTrackerAddr := (hd tl msg);
-	taskTrackerPort := int (hd tl msg);
-	mrClassName := (hd tl msg);
-	mapperAmount := int	(hd tl msg);
-	partitionIndex := int (hd tl msg);
-	outputFile := (hd tl msg);
-	outputRep := int (hd tl msg);
-	outputSize := int (hd tl msg);
+	msg = tl msg;
+	id := int (hd msg); msg = tl msg;
+	jobId := int (hd msg); msg = tl msg;
+	status := int (hd msg); msg = tl msg;
+	attemptCount := int (hd msg); msg = tl msg;
+	taskTrackerAddr := (hd msg); msg = tl msg;
+	taskTrackerPort := int (hd msg); msg = tl msg;
+	mrClassName := (hd msg); msg = tl msg;
+	mapperAmount := int	(hd msg); msg = tl msg;
+	partitionIndex := int (hd msg); msg = tl msg;
+	outputFile := (hd msg); msg = tl msg;
+	outputRep := int (hd msg); msg = tl msg;
+	outputSize := int (hd msg); msg = tl msg;
 	return ref ReducerTask(id, jobId, status, attemptCount, taskTrackerAddr, taskTrackerPort, mrClassName, mapperAmount, partitionIndex, outputFile, outputRep, outputSize);	
 }
+
+msg2tracker(msg : list of string) : ref TaskTrackerInfo
+{
+	msg = tl msg;
+	addr := hd msg; msg = tl msg;
+	port := int (hd msg); msg = tl msg;
+	mapperTaskNum := int (hd msg); msg = tl msg;
+	reducerTaskNum := int (hd msg); msg = tl msg;
+	isWorking := int (hd msg);
+	return ref TaskTrackerInfo(addr, port, mapperTaskNum, reducerTaskNum, isWorking);
+}
+
+

@@ -80,9 +80,9 @@ connHandle(conn : Connection)
 	
 	rdfd := sys->open(conn.dir + "/data", Sys->OREAD);
 	wdfd := sys->open(conn.dir + "/data", Sys->OWRITE);
-	rdf := sys->open(conn.dir + "/remote", Sys->OREAD);
+	rfd := sys->open(conn.dir + "/remote", Sys->OREAD);
 
-	addrlen := sys->read(rdfd, addr, len addr);
+	addrlen := sys->read(rfd, addr, len addr);
 	logger->logInfo("Message from: " + string addr[:addrlen]);
 	
 	msglen := sys->read(rdfd, msgStr, len msgStr);
@@ -102,6 +102,11 @@ connHandle(conn : Connection)
 				ok := jobtracker->startJob(id);
 				sys->fprint(wdfd, "%d", ok);
 			}
+			"updateTaskTracker" => {
+				tracker := mrutil->msg2tracker(msg);
+				ok := jobtracker->updateTaskTrackers(tracker);
+				sys->fprint(wdfd, "%d", ok);
+			}
 			"mapperSucceed" => {
 				mapperFileAddr := hd msg;
 				msg = tl msg;
@@ -114,7 +119,18 @@ connHandle(conn : Connection)
 				ok := jobtracker->reducerSucceed(reducer);
 				sys->fprint(wdfd, "%d", ok);
 			}
+			"mapperFailed" => {
+				mapper := mrutil->msg2mapper(msg);
+				ok := jobtracker->mapperFailed(mapper);
+				sys->fprint(wdfd, "%d", ok);
+			}
+			"reducerFailed" => {
+				reducer := mrutil->msg2reducer(msg);
+				ok := jobtracker->reducerFailed(reducer);
+				sys->fprint(wdfd, "%d", ok);
+			}
 		}
+	msglen = sys->read(rdfd, msgStr, len msgStr);
 	}
 }
 

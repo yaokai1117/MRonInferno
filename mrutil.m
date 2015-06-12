@@ -66,7 +66,9 @@ MRUtil : module {
 	init : fn();
 	mapper2msg : fn(mapper : ref MapperTask) : string;
 	reducer2msg : fn(reducer : ref ReducerTask) : string;
+	tracker2msg : fn(tracker : ref TaskTrackerInfo) : string;
 	msg2mapper : fn(msg : list of string) : ref MapperTask;
 	msg2reducer : fn(msg : list of string) : ref ReducerTask;
+	msg2tracker : fn(msg : list of string) : ref TaskTrackerInfo;
 
 };
