@@ -29,6 +29,7 @@ localAddr := "127.0.0.1";
 localPort := 66667;
 hostAddr := "127.0.0.1";
 hostPort := 66666;
+mapperFilePort := 70000;
 
 
 init(ctxt : ref Draw->Context, args : list of string)
@@ -39,6 +40,7 @@ init(ctxt : ref Draw->Context, args : list of string)
 	tasktracker = load TaskTracker TaskTracker->PATH;
 
 	mrutil->init();
+	tasktracker->init();
 
 	logger->init();
 	logger->setFileName("log_tasktrackerserver");
@@ -81,7 +83,7 @@ connHandle(conn : Connection)
 	rfd := sys->open(conn.dir + "/remote", Sys->OREAD);
 
 	addrlen := sys->read(rfd, addr, len addr);
-	logger->logInfo("Message from: " + string addr[:addrlen]);
+	logger->logInfo("Message from: " + string addr[:addrlen-1]);
 	
 	msglen := sys->read(rdfd, msgStr, len msgStr);
 	receive : while (msglen > 0) {
@@ -117,7 +119,6 @@ heartBeat()
 
 runMapper(mapper : ref MapperTask)
 {
-	sys->print("%s", mrutil->mapper2msg(mapper));
 	ok := tasktracker->runMapperTask(mapper);
 	msg : string;
 	if (ok == 0) {
@@ -134,7 +135,7 @@ runMapper(mapper : ref MapperTask)
 	}
 
 	(n, conn) := sys->dial("tcp!" + hostAddr + "!" + string hostPort, nil);	
-	msg = msg + "@" + mrutil->mapper2msg(mapper);
+	msg = msg + "@" + "tcp!" + localAddr + "!" + string mapperFilePort + "@" + mrutil->mapper2msg(mapper);
 	sys->fprint(conn.dfd, "%s", msg);
 
 	buf := array [Sys->ATOMICIO] of byte;

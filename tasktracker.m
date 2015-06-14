@@ -1,5 +1,5 @@
 TaskTracker : module {
-	PATH : con "/usr/fyabc/tasktracker.dis";
+	PATH : con "/usr/yaokai/tasktracker.dis";
 
 	init : fn();
 

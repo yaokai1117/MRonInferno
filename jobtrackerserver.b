@@ -83,7 +83,7 @@ connHandle(conn : Connection)
 	rfd := sys->open(conn.dir + "/remote", Sys->OREAD);
 
 	addrlen := sys->read(rfd, addr, len addr);
-	logger->logInfo("Message from: " + string addr[:addrlen]);
+	logger->logInfo("Message from: " + string addr[:addrlen-1]);
 	
 	msglen := sys->read(rdfd, msgStr, len msgStr);
 	receive : while (msglen > 0) {
