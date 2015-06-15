@@ -135,7 +135,7 @@ runMapper(mapper : ref MapperTask)
 	}
 
 	(n, conn) := sys->dial("tcp!" + hostAddr + "!" + string hostPort, nil);	
-	msg = msg + "@" + "tcp!" + localAddr + "!" + string mapperFilePort + "@" + mrutil->mapper2msg(mapper);
+	msg = msg + "@" + "tcp!" + localAddr + "!" + string (mapperFilePort + mapper.id)+ "@" + mrutil->mapper2msg(mapper);
 	sys->fprint(conn.dfd, "%s", msg);
 
 	buf := array [Sys->ATOMICIO] of byte;
@@ -148,11 +148,15 @@ runReducer(mapperFileAddr : string, reducer : ref ReducerTask)
 {
 	ok := tasktracker->runReducerTask(mapperFileAddr, reducer);
 	msg : string;
-	if (ok == 0) {
+	if (ok == 0) {  	#succeed
 		logger->logInfo("ReducerTask " + string reducer.id + " from job " + string reducer.jobId + " succeed!");
 		logger->scrlogInfo("ReducerTask " + string reducer.id + " from job " + string reducer.jobId + " succeed!");
 
 		msg = "reducerSucceed";
+	}
+	else if (ok == 1) { 	#still pending
+		logger->logInfo("ReducerTask " + string reducer.id + " from job " + string reducer.jobId + " get mapper address!");
+		return;
 	}
 	else {
 		logger->logInfo("ReducerTask " + string reducer.id + " from job " + string reducer.jobId + " failed!");

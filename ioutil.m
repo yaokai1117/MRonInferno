@@ -17,7 +17,7 @@ IOUtil : module{
 	};
 
 	OutputCollector : adt{
-		collection : list of ref KVs;
+		collection : ref Tables->Strhash[ref KVs];
 
 		collect : fn(collector : self ref OutputCollector, key : string, value : string);
 		getMap : fn(collector : self ref OutputCollector) : array of ref KVs;
@@ -30,7 +30,7 @@ IOUtil : module{
 
 	sendRemoteFile : fn(port : int, dir : string);
 
-	getRemoteFile : fn(addr :string, port : int, fileName : string, destPath : string) : ref Sys->FD;
+	getRemoteFile : fn(addr :string, fileName : string, destPath : string) : ref Sys->FD;
 
 	splitLine : fn(line : string) : (string ,string);
 	#//split the line into (key,value)

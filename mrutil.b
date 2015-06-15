@@ -2,7 +2,9 @@ implement MRUtil;
 
 include "mrutil.m";
 include "ioutil.m";
+include "tables.m";
 include "sys.m";
+
 sys : Sys;
 
 init()

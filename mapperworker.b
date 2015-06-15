@@ -3,31 +3,29 @@ implement MapperWorker;
 include "sys.m";
 include "draw.m";
 include "lists.m";
+include "tables.m";
 include "sort.m";
 include "bufio.m";
 
 include "mapperworker.m";
 include "mapreduce.m";
-#include "tasktracker.m";
 include "mrutil.m";
 include "ioutil.m";
 
 include "dfsutil.m";
 include "dfsclient.m";
-include "download.m";
 
 sys : Sys;
 lists : Lists;
 sort : Sort;
 bufio : Bufio;
+tables : Tables;
 
 mapreduce : MapReduce;
-#tasktracker : TaskTracker;
 ioutil : IOUtil;
 mrutil : MRUtil;
 dfsutil : DFSUtil;
 dfsclient : DFSClient;
-download : Download;
 
 FD : import sys;
 Iobuf : import bufio;
@@ -35,95 +33,91 @@ MapperTask : import mrutil;
 OutputCollector : import ioutil;
 DFSFile : import dfsutil;
 DFSChunkCmp : import dfsutil;
-buffer : ref Iobuf;
+Strhash : import tables;
 
-mapperPath := "/usr/fyabc/task/";
-folderName : string;
+mapperPath := "/usr/yaokai/task/";
+mapperAddr := "127.0.0.1";
 
-init(mapperTask : ref MapperTask)
+downloadMutex : chan of int;
+downloadMutex2 : chan of int;
+
+init()
 {
-	if(sys == nil)
-		sys = load Sys Sys->PATH;
-	if(lists == nil)
-		lists = load Lists Lists->PATH;
-	if(sort == nil)
-		sort = load Sort Sort->PATH;
-	if(bufio == nil)
-		bufio = load Bufio Bufio->PATH;
+	sys = load Sys Sys->PATH;
+	lists = load Lists Lists->PATH;
+	sort = load Sort Sort->PATH;
+	bufio = load Bufio Bufio->PATH;
 
-	if(ioutil == nil)
-		ioutil = load IOUtil IOUtil->PATH;
-	if(mrutil == nil)
-		mrutil = load MRUtil MRUtil->PATH;
-#	if(tasktracker == nil)
-#		tasktracker = load TaskTracker TaskTracker->PATH;
+	ioutil = load IOUtil IOUtil->PATH;
+	mrutil = load MRUtil MRUtil->PATH;
 
-	if (dfsclient == nil)
-		dfsclient = load DFSClient DFSClient->PATH;
-	if (dfsutil == nil) 
-		dfsutil = load DFSUtil DFSUtil->PATH;
-	if (download == nil) 
-		download = load Download Download->PATH;
+	dfsclient = load DFSClient DFSClient->PATH;
+	dfsutil = load DFSUtil DFSUtil->PATH;
+
+	tables = load Tables Tables->PATH;
 
 	ioutil->init();
 	mrutil->init();
-#	tasktracker->init();
-	dfsclient->init();
 	dfsutil->init();
 
-	folderName = mapperPath + "tasks_" + string mapperTask.id + "/";
-	sys->create(folderName, sys->OREAD, sys->DMDIR + 8r777);
-
-	if(sys->open(mapperPath + mapperTask.mrClassName, Sys->OREAD) == nil)
-	{
-		file := dfsclient->getFile(mapperTask.mrClassName);
-		total := (lists->last(file.chunks)).offset + big (lists->last(file.chunks)).size;
-		fd := sys->create(mapperPath + mapperTask.mrClassName, Sys->ORDWR, 8r600);
-		dd(fd, file,big 0,total);
-	}
-
-	mapreduce = load MapReduce (mapperPath + mapperTask.mrClassName);
-	mapreduce->init();
-
-	dfsclient->init();
-	file := dfsclient->getFile(mapperTask.inputFileBlock.fileName);
-	fd := sys->create(folderName + mapperTask.inputFileBlock.fileName + "_inputFileBlock", Sys->ORDWR, 8r600);
-	if(file == nil) sys->print("1\n");
-	dd(fd, file, mapperTask.inputFileBlock.offset, big mapperTask.inputFileBlock.size);
-	buffer = bufio->open(folderName + mapperTask.inputFileBlock.fileName + "_inputFileBlock", Bufio->OREAD);
-
-	run(mapperTask);
+	downloadMutex = chan [1] of int;
+	downloadMutex2 = chan [1] of int;
+	sys->print("111\n");
 }
 
 run(mapperTask : ref MapperTask)
 {
-	collector := collect();
+	downloadMutex <-= 0;
+	getmr(mapperTask);
+	<-downloadMutex;
 
-	saveToLocal(mapperTask, collector);
+	sys->print("322\n");
+	folderName := mapperPath + "tasks_" + string mapperTask.id + "/";
+	sys->create(folderName, sys->OREAD, sys->DMDIR + 8r777);
+	sys->print("333\n");
 
-#	tasktracker->mapperSucceed(mapperTask);
+	downloadMutex2 <-= 0;
+	getFileBlock(mapperTask);
+	<-downloadMutex2;
+
+	buffer := bufio->open(folderName + mapperTask.inputFileBlock.fileName + "_inputFileBlock", Bufio->OREAD);
+	sys->print("444\n");
+
+	collector := collect(buffer);
+	sys->print("555\n");
+
+	saveToLocal(mapperTask, collector, folderName);
+	sys->print("666\n");
+
+	spawn ioutil->sendRemoteFile(70000 + mapperTask.id,folderName);
+	sys->print("777\n");
 } 
 
-collect() : ref OutputCollector
+collect(buffer : ref Iobuf) : ref OutputCollector
 {
 	collector := ref OutputCollector(nil);
+	collector.collection = Strhash[ref IOUtil->KVs].new(10000, nil);
 	line : string;
 
 	while((line = buffer.gets('\n')) != nil)
 	{
-		(key , value) := ioutil->splitLine(line);
-		mapreduce->map(key, line, collector);
+		kvList := mapreduce->filt(line);
+		for ( ; kvList != nil ; kvList = tl kvList)
+		{
+			(key , value) := hd kvList;
+			mapreduce->map(key, value, collector);
+		}
 	}
 
 	return collector;
 }
 
-saveToLocal(mapperTask : ref MapperTask, collector : ref OutputCollector)
+saveToLocal(mapperTask : ref MapperTask, collector : ref OutputCollector, folderName : string)
 {
 	fds := array[mapperTask.reducerAmount] of ref FD;
 	for(i := 0; i < mapperTask.reducerAmount; i++)
 	{
-		fds[i] = sys->create(folderName + "part_" + string i, sys->ORDWR, 8r600);
+		fds[i] = sys->create(folderName + "tcp!" +  mapperAddr + "!" + string (70000 + mapperTask.id) + "_part_" + string i, sys->ORDWR, 8r600);
 	}
 
 	recordMap := collector.getMap();
@@ -149,25 +143,36 @@ saveToLocal(mapperTask : ref MapperTask, collector : ref OutputCollector)
 	}
 }
 
-###########################################
-#	MapperTask : adt{
-#		# common task properties 
-#		taskId : int;
-#		jobId : int;
-#		taskStatus : int;		
-#		attemptCount : int;
-#		taskTrackerName : string;
-#		mrClassName : string;
-#		outputDir : string;
-#
-#		createTaskFolder : fn();
-#		deleteTaskFolder : fn();
-#
-#		# mapper
-#		inputFileBlock : ref IOUtil->FileBlock;
-#		reducerAmount : int;
-#	};
-###########################################
+getmr(mapperTask : ref MapperTask)
+{
+	sys->print("222\n");
+	if(sys->open(mapperPath + mapperTask.mrClassName, Sys->OREAD) == nil)
+	{
+		dfsclient->init();
+		sys->print("233\n");
+		file := dfsclient->getFile(mapperTask.mrClassName);
+		sys->print("244\n");
+		total := (lists->last(file.chunks)).offset + big (lists->last(file.chunks)).size;
+		sys->print("255\n");
+		fd := sys->create(mapperPath + mapperTask.mrClassName, Sys->ORDWR, 8r600);
+		sys->print("266\n");
+		dd(fd, file,big 0,total);
+		sys->print("288\n");
+	}
+	sys->print("300\n");
+	mapreduce = load MapReduce (mapperPath + mapperTask.mrClassName);
+	sys->print("310\n");
+	mapreduce->init();
+}
+
+getFileBlock(mapperTask : ref MapperTask)
+{
+	folderName := mapperPath + "tasks_" + string mapperTask.id + "/";
+	dfsclient->init();
+	file := dfsclient->getFile(mapperTask.inputFileBlock.fileName);
+	fd := sys->create(folderName + mapperTask.inputFileBlock.fileName + "_inputFileBlock", Sys->ORDWR, 8r600);
+	dd(fd, file, mapperTask.inputFileBlock.offset, big mapperTask.inputFileBlock.size);
+}
 
 dd(fd : ref Sys->FD, file : ref DFSFile, offset : big, size : big)
 {

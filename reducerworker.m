@@ -1,12 +1,7 @@
 ReducerWorker : module {
-	PATH : con "/usr/fyabc/reducerworker.dis";
+	PATH : con "/usr/yaokai/reducerworker.dis";
 
 	init : fn();
-
-	#//There is a method that load the remote class(MR Instance).
-	newMRInstance : fn() : ref MRUtil->MapReduce;
-
-	createFolders : fn();
 	
-	run : fn();
+	run : fn(mapperFileAddrs : list of string , reducerTask : ref MRUtil->ReducerTask);
 };
