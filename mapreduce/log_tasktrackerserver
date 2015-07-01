@@ -1,0 +1,92 @@
+  [INFO] Message from: 127.0.0.1!47273
+  [INFO] Message from: 127.0.0.1!47274
+  [INFO] Message from: 127.0.0.1!47275
+  [INFO] Message from: 127.0.0.1!47276
+  [INFO] Message from: 127.0.0.1!47277
+  [INFO] Message from: 127.0.0.1!47278
+  [INFO] Message from: 127.0.0.1!47279
+  [INFO] Message from: 127.0.0.1!47280
+  [INFO] MapperTask 0 from job 0 succeed!
+  [INFO] Message from: 127.0.0.1!47287
+  [INFO] Feed back 0
+  [INFO] Message from: 127.0.0.1!47288
+  [INFO] Message from: 127.0.0.1!47289
+  [INFO] Message from: 127.0.0.1!47290
+  [INFO] MapperTask 1 from job 0 succeed!
+  [INFO] Message from: 127.0.0.1!47298
+  [INFO] Message from: 127.0.0.1!47299
+  [INFO] Feed back 0
+  [INFO] Message from: 127.0.0.1!47300
+  [INFO] Message from: 127.0.0.1!47302
+  [INFO] MapperTask 2 from job 0 succeed!
+  [INFO] Message from: 127.0.0.1!47309
+  [INFO]   [INFO] Message from: 127.0.0.1!47310
+Feed back 0
+  [INFO] Message from: 127.0.0.1!47311
+  [INFO] Message from: 127.0.0.1!47312
+  [INFO] MapperTask 3 from job 0 succeed!
+  [INFO] Message from: 127.0.0.1!47321
+  [INFO]   [INFO] Message from: 127.0.0.1!47322
+Feed back 0
+  [INFO] Message from: 127.0.0.1!47323
+  [INFO] Message from: 127.0.0.1!47325
+  [INFO] MapperTask 4 from job 0 succeed!
+  [INFO] Message from: 127.0.0.1!47331
+  [INFO] Feed back 0
+  [INFO] Message from: 127.0.0.1!47332
+  [INFO] Message from: 127.0.0.1!47333
+  [INFO] Message from: 127.0.0.1!47334
+  [INFO] MapperTask 5 from job 0 succeed!
+  [INFO] Message from: 127.0.0.1!47343
+  [INFO] Feed back 0
+  [INFO] Message from: 127.0.0.1!47344
+  [INFO] Message from: 127.0.0.1!47345
+  [INFO] Message from: 127.0.0.1!47346
+  [INFO] MapperTask 6 from job 0 succeed!
+  [INFO] Message from: 127.0.0.1!47353
+  [INFO]   [INFO] Feed back 0
+Message from: 127.0.0.1!47354
+  [INFO] Message from: 127.0.0.1!47355
+  [INFO] Message from: 127.0.0.1!47356
+  [INFO] MapperTask 7 from job 0 succeed!
+  [INFO] ReducerTask 8 from job 0 get mapper address!
+  [INFO]   [INFO] ReducerTask 9 from job 0 get mapper address!
+ReducerTask 10 from job 0 get mapper address!
+  [INFO]   [INFO] ReducerTask 11 from job 0 get mapper address!
+ReducerTask 8 from job 0 get mapper address!
+  [INFO] ReducerTask 9 from job 0 get mapper address!
+  [INFO]   [INFO] ReducerTask 10 from job 0 get mapper address!
+ReducerTask 11 from job 0 get mapper address!
+  [INFO] ReducerTask 8 from job 0 get mapper address!
+  [INFO]   [INFO] ReducerTask 9 from job 0 get mapper address!
+ReducerTask 10 from job 0 get mapper address!
+  [INFO]   [INFO] ReducerTask 11 from job 0 get mapper address!
+  [INFO] ReducerTask 8 from job 0 get mapper address!
+ReducerTask 9 from job 0 get mapper address!
+  [INFO]   [INFO] ReducerTask 10 from job 0 get mapper address!
+  [INFO] ReducerTask 11 from job 0 get mapper address!
+ReducerTask 8 from job 0 get mapper address!
+  [INFO]   [INFO] ReducerTask 9 from job 0 get mapper address!
+  [INFO] ReducerTask 10 from job 0 get mapper address!
+ReducerTask 11 from job 0 get mapper address!
+  [INFO]   [INFO] ReducerTask 8 from job 0 get mapper address!
+  [INFO] ReducerTask 9 from job 0 get mapper address!
+ReducerTask 10 from job 0 get mapper address!
+  [INFO]   [INFO] ReducerTask 11 from job 0 get mapper address!
+  [INFO] ReducerTask 8 from job 0 get mapper address!
+ReducerTask 9 from job 0 get mapper address!
+  [INFO]   [INFO] ReducerTask 10 from job 0 get mapper address!
+ReducerTask 11 from job 0 get mapper address!
+  [INFO] Message from: 127.0.0.1!47363
+  [INFO] Message from: 127.0.0.1!47364
+  [INFO] Feed back 0
+  [INFO] Message from: 127.0.0.1!47365
+  [INFO] Message from: 127.0.0.1!47366
+  [INFO] ReducerTask 8 from job 0 succeed!
+  [INFO] Feed back 0
+  [INFO] ReducerTask 9 from job 0 succeed!
+  [INFO] Feed back 0
+  [INFO] ReducerTask 10 from job 0 succeed!
+  [INFO] Feed back 0
+  [INFO] ReducerTask 11 from job 0 succeed!
+  [INFO] Feed back 0

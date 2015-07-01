@@ -6,7 +6,7 @@ include "ioutil.m";
 include "mrutil.m";
 include "jobs.m";
 include "jobtracker.m";
-include "logger.m";
+include "../logger/logger.m";
 
 include "tables.m";
 

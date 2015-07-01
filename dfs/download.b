@@ -21,7 +21,7 @@ DFSChunk : import dfsutil;
 DFSNode : import dfsutil;
 DFSChunkCmp : import dfsutil;
 
-dataPath := string "/usr/yaokai/cli/";
+dataPath := string "/appl/MR/cli/";
 
 init(ctxt : ref Draw->Context, args : list of string) 
 {

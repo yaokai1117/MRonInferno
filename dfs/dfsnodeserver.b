@@ -2,6 +2,8 @@ implement DFSNodeServer;
 
 include "sys.m";
 include "draw.m";
+include "bufio.m";
+
 include "dfsutil.m";
 include "dfsclient.m";
 
@@ -12,14 +14,15 @@ DFSFile : import dfsutil;
 DFSChunk : import dfsutil;
 DFSNode : import dfsutil;
 FD : import sys;
+Iobuf : import bufio;
 
 sys : Sys;
+bufio : Bufio;
 dfsutil : DFSUtil;
 dfsclient : DFSClient;
 
-dataPath := string "/usr/yaokai/ser/";
-homePath := string "/usr/yaokai/";
-localAddr := string "127.0.0.1";
+dataPath := string "/appl/MR/ser/";
+homePath := string "/appl/MR/";
 localPort := int 2334;
 chunkNumber := int 0;
 
@@ -31,11 +34,18 @@ DFSNodeServer : module {
 init(ctxt : ref Draw->Context, args : list of string)
 {
 	sys = load Sys Sys->PATH;
+	bufio = load Bufio Bufio->PATH;
 	dfsutil = load DFSUtil DFSUtil->PATH;
 	dfsclient = load DFSClient DFSClient->PATH;
 
 	dfsutil->init();
-	spawn heartBeat();
+
+	buffer := bufio->open("/appl/MR/config", Bufio->OREAD);
+	buffer.gets('\n');
+	localAddr := buffer.gets('\n');
+	localAddr = localAddr[:len localAddr - 1];
+
+	spawn heartBeat(localAddr);
 
 	(n, conn) := sys->announce("tcp!*!" + string localPort);
 	if (n < 0) {
@@ -47,7 +57,7 @@ init(ctxt : ref Draw->Context, args : list of string)
 	}
 }
 
-heartBeat() {
+heartBeat(localAddr : string) {
 	while (1) {
 		dfsclient->init();
 		dfsclient->updateNode(localAddr, localPort, chunkNumber); 

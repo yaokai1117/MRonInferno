@@ -1,5 +1,5 @@
 TaskTracker : module {
-	PATH : con "/usr/yaokai/tasktracker.dis";
+	PATH : con "/appl/MR/mapreduce/tasktracker.dis";
 
 	init : fn();
 

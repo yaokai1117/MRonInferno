@@ -2,39 +2,46 @@ implement TaskTrackerServer;
 
 include "sys.m";
 include "draw.m";
+include "bufio.m";
+include "tables.m";
+
 include "ioutil.m";
 include "mrutil.m";
-include "logger.m";
+include "../logger/logger.m";
 include "tasktracker.m";
 
-include "tables.m";
 
 TaskTrackerServer : module {
 	init : fn(ctxt : ref Draw->Context, args : list of string);
 };
 
 sys : Sys;
+bufio : Bufio;
 ioutil : IOUtil;
 mrutil : MRUtil;
 logger : Logger;
 tasktracker : TaskTracker;
 
 Connection : import sys;
+Iobuf : import bufio;
 
 MapperTask : import mrutil;
 ReducerTask : import mrutil;
 TaskTrackerInfo : import mrutil;
 
-localAddr := "127.0.0.1";
+localAddr : string;
 localPort := 66667;
-hostAddr := "127.0.0.1";
+hostAddr : string;
 hostPort := 66666;
 mapperFilePort := 70000;
+
+mutex : chan of int;
 
 
 init(ctxt : ref Draw->Context, args : list of string)
 {
 	sys = load Sys Sys->PATH;
+	bufio = load Bufio Bufio->PATH;
 	mrutil = load MRUtil MRUtil->PATH;
 	logger = load Logger Logger->PATH;
 	tasktracker = load TaskTracker TaskTracker->PATH;
@@ -44,6 +51,15 @@ init(ctxt : ref Draw->Context, args : list of string)
 
 	logger->init();
 	logger->setFileName("log_tasktrackerserver");
+
+	mutex = chan [1] of int;
+
+	buffer := bufio->open("/appl/MR/config", Bufio->OREAD);
+	hostAddr = buffer.gets('\n');
+	hostAddr = hostAddr[:len hostAddr - 1];
+	localAddr = buffer.gets('\n');
+	localAddr = localAddr[:len localAddr - 1];
+
 
 	(ok, conn) := sys->announce("tcp!*!" + string localPort);
 	if (ok < 0) {
@@ -119,7 +135,9 @@ heartBeat()
 
 runMapper(mapper : ref MapperTask)
 {
+	mutex <- = 0;
 	ok := tasktracker->runMapperTask(mapper);
+	<- mutex;
 	msg : string;
 	if (ok == 0) {
 		logger->logInfo("MapperTask " + string mapper.id + " from job " + string mapper.jobId + " succeed!");
@@ -146,7 +164,9 @@ runMapper(mapper : ref MapperTask)
 
 runReducer(mapperFileAddr : string, reducer : ref ReducerTask)
 {
+	mutex <- = 0;
 	ok := tasktracker->runReducerTask(mapperFileAddr, reducer);
+	<- mutex;
 	msg : string;
 	if (ok == 0) {  	#succeed
 		logger->logInfo("ReducerTask " + string reducer.id + " from job " + string reducer.jobId + " succeed!");

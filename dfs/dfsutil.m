@@ -1,5 +1,5 @@
 DFSUtil :  module {
-	PATH : con "/usr/yaokai/dfsutil.dis";
+	PATH : con "/appl/MR/dfs/dfsutil.dis";
 	
 	# load ths Sys and Lists module, must be called before using toString, removeChunk and removeNode
 	init : fn();

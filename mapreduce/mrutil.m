@@ -1,5 +1,5 @@
 MRUtil : module {
-	PATH : con "/usr/yaokai/mrutil.dis";
+	PATH : con "/appl/MR/mapreduce/mrutil.dis";
 	
 	SUCCESS : con 0;
 	PENDING : con 1;

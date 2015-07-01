@@ -1,5 +1,5 @@
 DFSClient : module {
-	PATH : con "/usr/yaokai/dfsclient.dis";
+	PATH : con "/appl/MR/dfs/dfsclient.dis";
 	
 # establish a connection to master server
 	init : fn();

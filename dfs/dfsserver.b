@@ -6,7 +6,7 @@ include "dfsmaster.m";
 include "dfsutil.m";
 include "hash.m";
 include "tables.m";
-include "xmlhandle.m";
+include "../xml/xmlhandle.m";
 
 include "xml.m";
 include "bufio.m";
@@ -22,8 +22,8 @@ dfsmaster : DFSMaster;
 dfsutil : DFSUtil;
 xmlhandle : XmlHandle;
 
-dataPath : con "/usr/yaokai/ser/";
-homePath : con "/usr/yaokai/";
+dataPath : con "/appl/MR/ser/";
+homePath : con "/appl/MR/";
 
 
 DFSServer : module {
@@ -68,11 +68,6 @@ connHandle(conn : Connection, ctxt : ref Draw->Context)
 	addr := array [sys->ATOMICIO] of byte;
 	msgStr := array [sys->ATOMICIO] of byte;
 	msg : list of string;
-	
-#	dfsmaster->updateNode(ref DFSNode("127.0.0.1", 2334, 3));
-#	dfsmaster->updateNode(ref DFSNode("home", 110, 3));
-#	dfsmaster->updateNode(ref DFSNode("school", 233, 0));
-#	dfsmaster->updateNode(ref DFSNode("hospital", 120, 2));
 	
 	rdfd := sys->open(conn.dir + "/data", sys->OREAD);
 	wdfd := sys->open(conn.dir + "/data", sys->OWRITE);

@@ -1,5 +1,5 @@
 MapperWorker : module {
-	PATH : con "/usr/yaokai/mapperworker.dis";
+	PATH : con "/appl/MR/mapreduce/mapperworker.dis";
 
 	init : fn();
 

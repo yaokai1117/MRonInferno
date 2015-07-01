@@ -1,5 +1,5 @@
 Logger : module {
-	PATH : con "/usr/daniel/MRonInferno-master/logger.dis";
+	PATH : con "/appl/MR/logger/logger.dis";
 	
 	OK : con 1;
 	ERR : con 0;

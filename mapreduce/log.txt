@@ -1,0 +1,64 @@
+  [INFO] IOUtil->getRemoteFile: get file tcp!127.0.0.1!70006_part_0 from tcp!127.0.0.1!700  [INFO] IOUtil->sendRemoteFi  [INFO] IOUtil->getRemoteFile: get file tcp!127.0.0.1!70005_  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!7  [INFO] IOUtil->getRemoteFile:   [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70003_part_0 to 127.0.0.1!4444  [  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70002_part_0 to 127.0.0.1!59374
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70001_part_0 to 127.0.0.1!57489
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70000_part_0 to 127.0.0.1!37345
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70000_part_0 to 127.0.0.1!37346
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70006_part_1 to 127.0.0.1!51595
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70005_part_1 to 127.0.0.1!37531
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70004_part_1 to 127.0.0.1!49574
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70003_part_1 to 127.0.0.1!44455
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70002_part_1 to 127.0.0.1!59386
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70001_part_1 to 127.0.0.1!57501
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70000_part_1 to 127.0.0.1!37357
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70000_part_1 to 127.0.0.1!37358
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70006_part_2 to 127.0.0.1!51607
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70005_part_2 to 127.0.0.1!37543
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70004_part_2 to 127.0.0.1!49586
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70003_part_2 to 127.0.0.1!44467
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70002_part_2 to 127.0.0.1!59398
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70001_part_2 to 127.0.0.1!57513
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70000_part_2 to 127.0.0.1!37369
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70000_part_2 to 127.0.0.1!37370
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70006_part_3 to 127.0.0.1!51624
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70005_part_3 to 127.0.0.1!37560
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70004_part_3 to 127.0.0.1!49603
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70003_part_3 to 127.0.0.1!44484
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70002_part_3 to 127.0.0.1!59415
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70001_part_3 to 127.0.0.1!57530
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70000_part_3 to 127.0.0.1!37386
+
+  [INFO] IOUtil->sendRemoteFile: send file tcp!127.0.0.1!70000_part_3 to 127.0.0.1!37387
+
+>getRemoteFile: get file tcp!127.0.0.1!70006_part_3 from tcp!127.0.0.1!70006 to /appl/MR/task/tasks_11/
+  [INFO] IOUtil->getRemoteFile: get file tcp!127.0.0.1!70005_part_3 from tcp!127.0.0.1!70005 to /appl/MR/task/tasks_11/
+  [INFO] IOUtil->getRemoteFile: get file tcp!127.0.0.1!70004_part_3 from tcp!127.0.0.1!70004 to /appl/MR/task/tasks_11/
+  [INFO] IOUtil->getRemoteFile: get file tcp!127.0.0.1!70003_part_3 from tcp!127.0.0.1!70003 to /appl/MR/task/tasks_11/
+  [INFO] IOUtil->getRemoteFile: get file tcp!127.0.0.1!70002_part_3 from tcp!127.0.0.1!70002 to /appl/MR/task/tasks_11/
+  [INFO] IOUtil->getRemoteFile: get file tcp!127.0.0.1!70001_part_3 from tcp!127.0.0.1!70001 to /appl/MR/task/tasks_11/
+  [INFO] IOUtil->getRemoteFile: get file tcp!127.0.0.1!70000_part_3 from tcp!127.0.0.1!70000 to /appl/MR/task/tasks_11/
+  [INFO] IOUtil->getRemoteFile: get file tcp!127.0.0.1!70000_part_3 from tcp!127.0.0.1!70000 to /appl/MR/task/tasks_11/

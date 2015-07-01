@@ -12,8 +12,8 @@ include "mapreduce.m";
 include "mrutil.m";
 include "ioutil.m";
 
-include "dfsutil.m";
-include "dfsclient.m";
+include "../dfs/dfsutil.m";
+include "../dfs/dfsclient.m";
 
 sys : Sys;
 lists : Lists;
@@ -35,8 +35,8 @@ DFSFile : import dfsutil;
 DFSChunkCmp : import dfsutil;
 Strhash : import tables;
 
-mapperPath := "/usr/yaokai/task/";
-mapperAddr := "127.0.0.1";
+mapperPath := "/appl/MR/task/";
+mapperAddr : string;
 
 downloadMutex : chan of int;
 downloadMutex2 : chan of int;
@@ -59,6 +59,11 @@ init()
 	ioutil->init();
 	mrutil->init();
 	dfsutil->init();
+
+	buffer := bufio->open("/appl/MR/config", Bufio->OREAD);
+	buffer.gets('\n');
+	mapperAddr = buffer.gets('\n');
+	mapperAddr = mapperAddr[: len mapperAddr - 1];
 
 	downloadMutex = chan [1] of int;
 	downloadMutex2 = chan [1] of int;

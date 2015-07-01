@@ -1,5 +1,5 @@
 DFSMaster : module {
-	PATH : con "/usr/yaokai/dfsmaster.dis";
+	PATH : con "/appl/MR/dfs/dfsmaster.dis";
 
 	init : fn();
 

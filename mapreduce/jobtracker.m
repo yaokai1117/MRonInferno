@@ -1,5 +1,5 @@
 JobTracker : module {
-		PATH : con "/usr/yaokai/jobtracker.dis";
+		PATH : con "/appl/MR/mapreduce/jobtracker.dis";
 
 		init : fn();
 

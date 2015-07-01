@@ -1,5 +1,5 @@
 ReducerWorker : module {
-	PATH : con "/usr/yaokai/reducerworker.dis";
+	PATH : con "/appl/MR/mapreduce/reducerworker.dis";
 
 	init : fn();
 	

@@ -1,5 +1,5 @@
 XmlHandle : module {
-	PATH : con "/usr/yaokai/xmlhandle.dis";
+	PATH : con "/appl/MR/xml/xmlhandle.dis";
 
 # write the data of DFS adts to xml files
 

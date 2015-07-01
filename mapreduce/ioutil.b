@@ -4,9 +4,9 @@ include "sys.m";
 include "sort.m";
 include "bufio.m";
 include "ioutil.m";
-include "logger.m";
-include "dfsclient.m";
-include "dfsutil.m";
+include "../logger/logger.m";
+include "../dfs/dfsclient.m";
+include "../dfs/dfsutil.m";
 include "lists.m";
 include "tables.m";
 

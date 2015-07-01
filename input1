@@ -4,7 +4,7 @@ include "sys.m";
 include "dfsutil.m";
 include "dfsclient.m";
 
-include "../xml/xmlhandle.m";
+include "xmlhandle.m";
 include "xml.m";
 include "bufio.m";
 include "lists.m";
@@ -14,7 +14,6 @@ dfsutil : DFSUtil;
 
 xml : Xml;
 xmlhd : XmlHandle;
-bufio : Bufio;
 lists : Lists;
 
 DFSFile : import dfsutil;
@@ -23,7 +22,6 @@ DFSNode : import dfsutil;
 Connection : import sys;
 Parser : import xml;
 FD : import sys;
-Iobuf : import bufio;
 
 masterAddr : string;
 masterPort : int;
@@ -43,8 +41,6 @@ init() {
 		xmlhd = load XmlHandle XmlHandle->PATH;
 	if (lists == nil)
 		lists = load Lists Lists->PATH;
-	if (bufio == nil)
-		bufio = load Bufio Bufio->PATH;
 
 	xml->init();
 	dfsutil->init();
@@ -52,14 +48,12 @@ init() {
 	#masterAddr = "192.168.43.216";
 	#masterPort = 2333;
 
-	buffer := bufio->open("/appl/MR/config", Bufio->OREAD);
-	masterAddr = buffer.gets('\n');
-	masterAddr = masterAddr[:len masterAddr - 1];
+	masterAddr = "127.0.0.1";
 	masterPort = 2333;
 
 	defaultRep = 3;
 	defaultChunkSize = 1<<20;
-	defaultTempPath = "/appl/MR/cli/";
+	defaultTempPath = "/usr/fyabc/cli/";
 
 	ok : int;
 	(ok, conn) = sys->dial("tcp!" + masterAddr + "!" + string masterPort, nil);

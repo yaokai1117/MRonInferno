@@ -1,7 +1,7 @@
 implement XmlHandle;
 
 include "sys.m";
-include "dfsutil.m";
+include "../dfs/dfsutil.m";
 include "xml.m";
 include "bufio.m";
 include "xmlhandle.m";

@@ -1,5 +1,5 @@
 Jobs : module {
-		PATH : con "/usr/yaokai/jobs.dis";
+		PATH : con "/appl/MR/mapreduce/jobs.dis";
 
 		Job : adt {
 			id : int;

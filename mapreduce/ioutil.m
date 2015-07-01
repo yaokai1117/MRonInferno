@@ -1,5 +1,5 @@
 IOUtil : module{
-	PATH : con "/usr/yaokai/ioutil.dis";
+	PATH : con "/appl/MR/mapreduce/ioutil.dis";
 
 	FileBlock : adt{
 		fileName : string;

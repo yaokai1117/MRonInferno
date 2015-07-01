@@ -11,8 +11,8 @@ include "mapreduce.m";
 include "mrutil.m";
 include "ioutil.m";
 
-include "dfsutil.m";
-include "dfsclient.m";
+include "../dfs/dfsutil.m";
+include "../dfs/dfsclient.m";
 
 sys : Sys;
 lists : Lists;
@@ -36,7 +36,7 @@ DFSNode : import dfsutil;
 DFSChunkCmp : import dfsutil;
 Strhash : import tables;
 
-reducerPath := "/usr/yaokai/task/";
+reducerPath := "/appl/MR/task/";
 downloadMutex : chan of int;
 
 init()
@@ -179,6 +179,7 @@ ud(folderName : string , fileName : string , replicas : int , chunkSize : int)
 		for (q := chunk.nodes; q != nil; q = tl q)
 			sys->print("\t\t%s", (hd q).toString());
 	}
+	sys->chdir("/appl/MR/");
 }
 
 dd(fd : ref Sys->FD, file : ref DFSFile, offset : big, size : big)
