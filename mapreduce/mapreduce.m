@@ -7,6 +7,8 @@ MapReduce : module{
 
 	filt : fn(line : string) : list of (string , string);
 
+	combine : fn(key : string, values : list of string) : (string, string);
+
 	keySpaceSize : fn() : int;
 
 	hashKey : fn(key : string) : int;

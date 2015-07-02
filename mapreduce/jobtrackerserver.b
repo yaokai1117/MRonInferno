@@ -125,8 +125,9 @@ connHandle(conn : Connection)
 				sys->fprint(wdfd, "%d", ok);
 			}
 			"reducerFailed" => {
+				failedAddr := hd msg; msg = tl msg;
 				reducer := mrutil->msg2reducer(msg);
-				ok := jobtracker->reducerFailed(reducer);
+				ok := jobtracker->reducerFailedonMapper(reducer, failedAddr);
 				sys->fprint(wdfd, "%d", ok);
 			}
 		}

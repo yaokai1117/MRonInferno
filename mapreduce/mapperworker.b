@@ -140,10 +140,17 @@ saveToLocal(mapperTask : ref MapperTask, collector : ref OutputCollector, folder
 		values := recordMap[i].values;
 
 		j := mapreduce->hashKey(key) / keyRange;
-		for( ; values != nil; values = tl values)
-		{
-			value := hd values;
-			sys->fprint(fds[j], "%s", key + " " + value + "\n");
+
+		if (mapperTask.combinable == 1) {
+			(key_cb, value_cb) := mapreduce->combine(key, values);
+			sys->fprint(fds[j], "%s", key_cb + " " + value_cb + "\n");
+		}
+		else {
+			for( ; values != nil; values = tl values)
+			{
+				value := hd values;
+				sys->fprint(fds[j], "%s", key + " " + value + "\n");
+			}
 		}
 	}
 }

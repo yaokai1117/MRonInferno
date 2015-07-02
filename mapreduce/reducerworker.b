@@ -54,7 +54,7 @@ init()
 	downloadMutex = chan [1] of int;
 }
 
-run(mapperFileAddrs : list of string , reducerTask : ref ReducerTask)
+run(mapperFileAddrs : list of string , reducerTask : ref ReducerTask) : (int, string)
 {
 	downloadMutex <-= 0;
 	getmr(reducerTask);
@@ -67,7 +67,8 @@ run(mapperFileAddrs : list of string , reducerTask : ref ReducerTask)
 	for( ; mapperFileAddrs != nil; mapperFileAddrs = tl mapperFileAddrs)
 	{
 		mapperFileAddr := hd mapperFileAddrs;
-		ioutil->getRemoteFile(mapperFileAddr , mapperFileAddr + "_part_" + string reducerTask.partitionIndex , folderName);
+		if (nil == ioutil->getRemoteFile(mapperFileAddr , mapperFileAddr + "_part_" + string reducerTask.partitionIndex , folderName))
+			return (-1, mapperFileAddr);
 		files = (folderName + mapperFileAddr + "_part_" + string reducerTask.partitionIndex) :: files;
 	}
 
@@ -123,6 +124,7 @@ run(mapperFileAddrs : list of string , reducerTask : ref ReducerTask)
 	buffer.close();
 
 	ud(folderName , string reducerTask.id + "_" + reducerTask.outputFile , reducerTask.outputRep , reducerTask.outputSize);
+	return (1, nil);
 }
 
 getmr(reducerTask : ref ReducerTask)

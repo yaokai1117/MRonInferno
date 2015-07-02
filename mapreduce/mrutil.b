@@ -47,6 +47,7 @@ mapper2msg(mapper : ref MapperTask) : string
 			"@" + string mapper.status + "@" + string mapper.attemptCount + 
 			"@" + mapper.taskTrackerAddr + "@" + string mapper.taskTrackerPort + 
 			"@" + mapper.mrClassName + "@" + string mapper.reducerAmount + 
+			"@" + string mapper.combinable + 
 			"@" + mapper.inputFileBlock.fileName + "@" + string mapper.inputFileBlock.offset + "@" + string mapper.inputFileBlock.size;
 	return msg;
 }
@@ -65,7 +66,7 @@ tracker2msg(tracker : ref TaskTrackerInfo) : string
 {
 	msg := "tracker@" + tracker.addr + "@" + string tracker.port + 
 			 "@" + string tracker.mapperTaskNum + "@" + string tracker.reducerTaskNum +
-			 "@" + string tracker.isWorking;
+			 "@" + string tracker.isWorking + "@" + string tracker.timeStamp;
 	return msg;
 }
 
@@ -81,11 +82,12 @@ msg2mapper(msg : list of string) : ref MapperTask
 	taskTrackerPort := int (hd msg); msg = tl msg;
 	mrClassName := (hd msg); msg = tl msg;
 	reducerAmount := int (hd msg); msg = tl msg;
+	combinable := int (hd msg); msg = tl msg;
 	fileName := (hd msg); msg = tl msg;
 	offset := big (hd msg); msg = tl msg;
 	size := int (hd msg); msg = tl msg;
 	fileBlock := ref IOUtil->FileBlock(fileName, offset, size);	
-	return ref MapperTask(id, jobId, status, attemptCount, taskTrackerAddr, taskTrackerPort, mrClassName, reducerAmount, fileBlock);
+	return ref MapperTask(id, jobId, status, attemptCount, taskTrackerAddr, taskTrackerPort, mrClassName, reducerAmount, combinable, fileBlock);
 }
 
 msg2reducer(msg : list of string) : ref ReducerTask
@@ -113,8 +115,9 @@ msg2tracker(msg : list of string) : ref TaskTrackerInfo
 	port := int (hd msg); msg = tl msg;
 	mapperTaskNum := int (hd msg); msg = tl msg;
 	reducerTaskNum := int (hd msg); msg = tl msg;
-	isWorking := int (hd msg);
-	return ref TaskTrackerInfo(addr, port, mapperTaskNum, reducerTaskNum, isWorking);
+	isWorking := int (hd msg); msg = tl msg;
+	timeStamp := int (hd msg);
+	return ref TaskTrackerInfo(addr, port, mapperTaskNum, reducerTaskNum, isWorking, timeStamp);
 }
 
 

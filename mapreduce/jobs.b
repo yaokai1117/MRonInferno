@@ -158,7 +158,7 @@ jobConfig2msg(config : ref JobConfig) : string
 	msg := "jobConfig" + "@" + config.name + "@" + config.mrClassName + 
 			 "@" + config.inputFile + "@" + config.outputFile + 
 			 "@" + string config.outputRep + "@" + string config.outputSize + 
-			 "@" + string config.mapperAmount + "@" + string config.reducerAmount + "@" + string config.maxAttemptNum;
+			 "@" + string config.mapperAmount + "@" + string config.reducerAmount + "@" + string config.maxAttemptNum + "@" + string config.combinable;
 	return msg;
 }
 
@@ -174,7 +174,8 @@ msg2jobConfig(msg : list of string) : ref JobConfig
 	mapperAmount := int (hd msg); msg = tl msg;
 	reducerAmount := int (hd msg); msg = tl msg;
 	maxAttemptNum := int (hd msg); msg = tl msg;
-	return ref JobConfig(name, mrClassName, inputFile, outputFile, outputRep, outputSize, mapperAmount, reducerAmount, maxAttemptNum);
+	combinable := int (hd msg); msg = tl msg;
+	return ref JobConfig(name, mrClassName, inputFile, outputFile, outputRep, outputSize, mapperAmount, reducerAmount, maxAttemptNum, combinable);
 }
 
 

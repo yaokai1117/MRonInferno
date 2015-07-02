@@ -106,7 +106,7 @@ connHandle(conn : Connection, ctxt : ref Draw->Context)
 				datafd := sys->open(dataPath + string chunkId, Sys->OREAD);
 
 				if(datafd != nil)
-					spawn sendReadData(datafd, chunkId, conn);
+					sendReadData(datafd, chunkId, conn);
 
 				break receive;
 			}

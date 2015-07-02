@@ -105,6 +105,7 @@ log(message : string, property : int) : int
 		if(log_fd == nil) {	# File Not Found
 			log_fd = sys->create(fileName, sys->ORDWR, 8r777);
 			scrlogInfo("Explicit-name log file \"" + fileName + "\" NOT found. Automatically creating...");
+			logInfo("\n  ------------------------------------------\n");
 
 			if(log_fd == nil) {
 				scrlogInfo("Log file \"" + fileName + "\" creation failed.");

@@ -25,6 +25,8 @@ xmlhandle : XmlHandle;
 dataPath : con "/appl/MR/ser/";
 homePath : con "/appl/MR/";
 
+mutex : chan of int;
+
 
 DFSServer : module {
 	init : fn(ctxt : ref Draw->Context, args : list of string);
@@ -39,6 +41,8 @@ init(ctxt : ref Draw->Context, args : list of string)
 	
 	dfsmaster->init();
 	dfsutil->init();
+
+	mutex = chan [1] of int;
 
 	(n, conn) := sys->announce("tcp!*!2333");
 	if (n < 0) {
@@ -124,7 +128,7 @@ connHandle(conn : Connection, ctxt : ref Draw->Context)
 				xmlf := sys->create(dataPath + name + ".xml", sys->ORDWR, 8r600);
 				xmlhandle->file2xml(xmlf, file);
 				sys->seek(xmlf, big 0, Sys->SEEKSTART);
-				spawn sendXml(name, xmlf, conn);
+				sendXml(name, xmlf, conn);
 				break receive;
 			}
 
@@ -179,6 +183,7 @@ list2string(src : list of string) : string
 
 sendXml(name : string, xmlf : ref Sys->FD, conn : Connection)
 {
+	mutex <- = 0;
 	dfd := sys->open(conn.dir + "/data", sys->ORDWR);
 	sys->mount(dfd, nil, dataPath + "remote",Sys->MCREATE, nil);
 	xmlf2 := sys->create(dataPath + "remote/" + name + ".xml", sys->ORDWR, 8r600);
@@ -190,6 +195,7 @@ sendXml(name : string, xmlf : ref Sys->FD, conn : Connection)
 	}while ( length == len buf);
 	sys->unmount(nil, dataPath + "remote");
 	sys->remove(dataPath + name + ".xml");
+	<- mutex;
 }
 
 

@@ -47,7 +47,7 @@ runMapperTask(mapper : ref MapperTask) : int
 	return 0;
 }
 
-runReducerTask(mapperFileAddr : string, reducer : ref ReducerTask) : int
+runReducerTask(mapperFileAddr : string, reducer : ref ReducerTask) : (int, string)
 {
 	mapperAddrList := m2rTable.find(reducer.id);
 	if (mapperAddrList == nil) {
@@ -56,11 +56,10 @@ runReducerTask(mapperFileAddr : string, reducer : ref ReducerTask) : int
 	}
 	if (len mapperAddrList.items < reducer.mapperAmount) {
 		mapperAddrList.items = mapperFileAddr :: mapperAddrList.items;
-		return 1;
+		return (1, nil);
 	}
 	
-	reducerworker->run(mapperAddrList.items, reducer);
-	return 0;
+	return reducerworker->run(mapperAddrList.items, reducer);
 }
 
 

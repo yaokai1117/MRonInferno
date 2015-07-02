@@ -3,5 +3,5 @@ ReducerWorker : module {
 
 	init : fn();
 	
-	run : fn(mapperFileAddrs : list of string , reducerTask : ref MRUtil->ReducerTask);
+	run : fn(mapperFileAddrs : list of string , reducerTask : ref MRUtil->ReducerTask) : (int, string);
 };

@@ -125,9 +125,9 @@ connHandle(conn : Connection)
 heartBeat()
 {
 	while (1) {
-		sys->sleep(10000);
+		sys->sleep(3000);
 		(n, conn) := sys->dial("tcp!" + hostAddr + "!" + string hostPort, nil);	
-		tracker := ref TaskTrackerInfo(localAddr, localPort, 0, 0, 1);
+		tracker := ref TaskTrackerInfo(localAddr, localPort, 0, 0, 1, 0);
 		msg := "updateTaskTracker" + "@" + mrutil->tracker2msg(tracker);		
 		sys->fprint(conn.dfd, "%s", msg);
 	}
@@ -165,7 +165,7 @@ runMapper(mapper : ref MapperTask)
 runReducer(mapperFileAddr : string, reducer : ref ReducerTask)
 {
 	mutex <- = 0;
-	ok := tasktracker->runReducerTask(mapperFileAddr, reducer);
+	(ok, failedAddr) := tasktracker->runReducerTask(mapperFileAddr, reducer);
 	<- mutex;
 	msg : string;
 	if (ok == 0) {  	#succeed
@@ -182,7 +182,7 @@ runReducer(mapperFileAddr : string, reducer : ref ReducerTask)
 		logger->logInfo("ReducerTask " + string reducer.id + " from job " + string reducer.jobId + " failed!");
 		logger->scrlogInfo("ReducerTask " + string reducer.id + " from job " + string reducer.jobId + " failed!");
 		
-		msg = "reducerFailed";
+		msg = "reducerFailed" + "@" + failedAddr;
 	}
 
 	(n, conn) := sys->dial("tcp!" + hostAddr + "!" + string hostPort, nil);	

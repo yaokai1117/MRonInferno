@@ -35,6 +35,7 @@ Jobs : module {
 			mapperAmount : int;
 			reducerAmount : int;
 			maxAttemptNum : int;
+			combinable : int;
 
 			#functions
 			toString : fn(jc : self ref JobConfig) : string;

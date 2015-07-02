@@ -58,6 +58,11 @@ filt(line : string) : list of (string , string)
 	return ret;
 }
 
+combine(key : string, values : list of string) : (string, string)
+{
+	return (key, string len values);
+}
+
 keySpaceSize() : int
 {
 	return 58;

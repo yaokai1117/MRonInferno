@@ -21,5 +21,6 @@ JobTracker : module {
 		reducerSucceed : fn(task : ref MRUtil->ReducerTask) : int;
 		mapperFailed : fn(task : ref MRUtil->MapperTask) : int;
 		reducerFailed : fn(task : ref MRUtil->ReducerTask) : int;
+		reducerFailedonMapper : fn(task : ref MRUtil->ReducerTask, failedAddr : string) : int;
 };
 

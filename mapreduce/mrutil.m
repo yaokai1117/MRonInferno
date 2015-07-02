@@ -22,6 +22,7 @@ MRUtil : module {
 
 		# mapper
 		reducerAmount : int;
+		combinable : int;
 		inputFileBlock : ref IOUtil->FileBlock;
 	};
 
@@ -52,6 +53,7 @@ MRUtil : module {
 		mapperTaskNum : int;
 		reducerTaskNum : int;
 		isWorking : int;
+		timeStamp : int;
 
 		toString : fn(tt : self ref TaskTrackerInfo) : string;
 	};
