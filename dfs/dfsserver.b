@@ -1,3 +1,17 @@
+#######################################
+#
+#	The implemention of DFSServer.
+#	DFSServer is the service interface that DFSMaster can provide to DFSClient.
+#	DFSServer announce a Connection,
+#	listen the message from other computing equipment,
+#	and call appropriate function in dfsmaster.
+#	
+#	@author Kai Yao(yaokai)
+#	@author Yang Fan(fyabc) 
+#
+########################################
+
+
 implement DFSServer;
 
 include "sys.m";
@@ -22,7 +36,7 @@ dfsmaster : DFSMaster;
 dfsutil : DFSUtil;
 xmlhandle : XmlHandle;
 
-dataPath : con "/appl/MR/ser/";
+dataPath : con "/appl/MR/hostser/";
 homePath : con "/appl/MR/";
 
 mutex : chan of int;

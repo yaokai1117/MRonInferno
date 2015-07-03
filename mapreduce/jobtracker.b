@@ -270,6 +270,9 @@ mapperSucceed(task : ref MapperTask, mapperFileAddr : string) : int
 	else
 		m2rRecord.items = (task.id, mapperFileAddr) :: m2rRecord.items;
 
+	logger->logInfo("MapperTask " + string task.id + " from Job " + string task.jobId + " Succeed!!!");
+	logger->scrlogInfo("MapperTask " + string task.id + " from Job " + string task.jobId + " Succeed!!!");
+
 	if (m2rRecord != nil && len m2rRecord.items == job.config.mapperAmount) {
 		produceReducer(job);
 		for (i := 0; i < len job.reducerTasks.items; i++)
@@ -297,6 +300,9 @@ reducerSucceed(task : ref ReducerTask) : int
 	taskTracker := taskTrackers.find(localTask.taskTrackerAddr + string localTask.taskTrackerPort);
 	taskTracker.info.reducerTaskNum--;
 	taskTracker.reducers = lists->delete(localTask, taskTracker.reducers);
+
+	logger->logInfo("ReducerTask " + string task.id + " from Job " + string task.jobId + " Succeed!!!");
+	logger->scrlogInfo("ReducerTask " + string task.id + " from Job " + string task.jobId + " Succeed!!!");
 
 	if (job.getStatus() == MRUtil->SUCCESS) {
 		logger->logInfo("Job " + string job.id + " Succeed!!!");

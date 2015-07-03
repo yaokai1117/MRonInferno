@@ -1,3 +1,12 @@
+########################################
+#
+#	The implemention of DFSMaster.
+#	It communicates infomation with the DFSServer.
+#	
+#	@author Xinyang Shao(daniel)
+#
+########################################
+
 implement DFSMaster;
 
 include "sys.m";

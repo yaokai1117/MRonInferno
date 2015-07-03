@@ -1,3 +1,14 @@
+########################################
+#
+#	The implemention of List.
+#	This program can be called in inferno shell, to list all the files in distributed file system.
+#	An example of this command is: "list".
+#
+#	@author Kai Yao(yaokai)
+#
+########################################
+
+
 implement List;
 
 include "sys.m";

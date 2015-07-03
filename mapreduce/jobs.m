@@ -1,3 +1,11 @@
+########################################
+#
+#	The Jobs module includes adts of Job and JobConfig.
+#	
+#	@author Kai Yao(yaokai)
+#
+########################################
+
 Jobs : module {
 		PATH : con "/appl/MR/mapreduce/jobs.dis";
 

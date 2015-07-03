@@ -1,3 +1,12 @@
+########################################
+#
+#	The implemention of Delete.
+#	This program can be called in inferno shell, to delete a file in distributed file system.
+#	An example of this command is: "delete hello.txt".
+#
+#	@author Kai Yao(yaokai)
+#
+########################################
 implement Delete;
 
 include "sys.m";

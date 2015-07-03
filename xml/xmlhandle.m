@@ -1,3 +1,15 @@
+########################################
+#
+#	The XmlHandle module deal with the xml files.
+#	It writes the data of DFS adts to xml files and parses a xml file to DFS adts.
+#	The xml file is easily to transform.
+#	
+#	@author Kai Yao(yaokai)
+#	@author Yang Fan(fyabc) 
+#
+########################################
+
+
 XmlHandle : module {
 	PATH : con "/appl/MR/xml/xmlhandle.dis";
 

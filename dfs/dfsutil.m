@@ -1,3 +1,12 @@
+########################################
+#
+#	The API of DFSUtil.
+#	It implements functions and comparators.
+#
+#	@author Kai Yao(yaokai)
+#
+########################################
+
 DFSUtil :  module {
 	PATH : con "/appl/MR/dfs/dfsutil.dis";
 	

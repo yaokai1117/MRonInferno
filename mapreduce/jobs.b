@@ -1,3 +1,11 @@
+########################################
+#
+#	The implemention of the Jobs module.
+#
+#	@author Kai Yao(yaokai)
+#
+########################################
+
 implement Jobs;
 
 include "jobs.m";

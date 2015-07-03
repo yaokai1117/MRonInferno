@@ -1,3 +1,13 @@
+########################################
+#
+#	Logger module set the log file and write logs into the file and on the screen
+#	when the DFS and MapReduce jobs are working.
+#	The log file can record the state of the work and recover the work if it ends in failure.
+#	
+#	@author Xinyang Shao(daniel)
+#
+########################################
+
 Logger : module {
 	PATH : con "/appl/MR/logger/logger.dis";
 	

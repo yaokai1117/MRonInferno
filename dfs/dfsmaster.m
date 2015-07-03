@@ -1,3 +1,14 @@
+########################################
+#
+#	The Master side of the distributed file system.
+#	Maintain the infomation of every file, chunk and node in the file system.
+#	These infomation are stored in the metadata.
+#	DFSMaster provide some functions for clients to get and change the metadata.
+#
+#	@author Xinyang Shao(daniel)
+#
+########################################
+
 DFSMaster : module {
 	PATH : con "/appl/MR/dfs/dfsmaster.dis";
 

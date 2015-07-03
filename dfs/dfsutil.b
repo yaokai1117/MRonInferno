@@ -1,3 +1,12 @@
+########################################
+#
+#	The implemention of DFSUtil.
+#	It implements functions and comparators.
+#
+#	@author Kai Yao(yaokai)
+#
+########################################
+
 implement DFSUtil;
 
 include "dfsutil.m";

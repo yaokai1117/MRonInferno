@@ -1,3 +1,11 @@
+########################################
+#
+#	The implemention of the IOUtil module.
+#
+#	@author Yang Fan(fyabc) 
+#
+########################################
+
 implement IOUtil;
 
 include "sys.m";
@@ -130,7 +138,6 @@ sendRemoteFile(port : int, dir : string)
 		sys->unmount(nil, dir + "remote");
 
 		logger->logInfo("IOUtil->sendRemoteFile: send file " + fileName + " to " + string addr[:addrlen]);
-		logger->scrlogInfo("IOUtil->sendRemoteFile: send file " + fileName + " to " + string addr[:addrlen]);
 	}
 }
 
@@ -157,7 +164,6 @@ getRemoteFile(addr : string, fileName : string, destPath : string) : ref FD
 	}
 
 	logger->logInfo("IOUtil->getRemoteFile: get file " + fileName + " from " + addr + " to " + destPath);
-	logger->scrlogInfo("IOUtil->getRemoteFile: get file " + fileName + " from " + addr + " to " + destPath);
 	return ret;
 }
 

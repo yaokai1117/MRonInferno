@@ -1,3 +1,11 @@
+########################################
+#
+#	The implemention of the MRUtil module.
+#
+#	@author Kai Yao(yaokai)
+#
+########################################
+
 implement MRUtil;
 
 include "mrutil.m";

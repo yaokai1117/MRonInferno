@@ -1,3 +1,11 @@
+########################################
+#
+#	The MRUtil module includes adts of MapperTask, ReducerTask, TaskTrackerInfo and TaskTracker.
+#	
+#	@author Kai Yao(yaokai)
+#
+########################################
+
 MRUtil : module {
 	PATH : con "/appl/MR/mapreduce/mrutil.dis";
 	

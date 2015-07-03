@@ -1,3 +1,15 @@
+########################################
+#
+#	The IOUtil module includes some often used adts and utilities when doing MapReduce.
+#	The FileBlock adt is the input of each mappertask. It is created by function split().
+#	The OutputCollector adt is a collector of KVs. It is used in mappertask and reducertask.
+#	sendRemoteFile and getRemoteFile are used to send mapper results to workers.
+#	mergeSortedFiles is used to merge the mapper results into a file.
+#	
+#	@author Yang Fan(fyabc) 
+#
+########################################
+
 IOUtil : module{
 	PATH : con "/appl/MR/mapreduce/ioutil.dis";
 

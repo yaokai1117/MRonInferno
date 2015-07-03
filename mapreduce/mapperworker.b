@@ -1,3 +1,16 @@
+########################################
+#
+#	The implemention of the MapperWorker module.
+#	the mapreduce module and inputFileBlock are downloaded from DFS.
+#	collect() collect the pair of (key , value) into OutputCollector;
+#	saveToLocal() sort and combine the pairs in OutputCollector and write it into a local file.
+#
+#	@author Yang Fan(fyabc) 
+#	@author Kai Yao(yaokai)
+#	@author Guanji Gao(ggj)
+#
+########################################
+
 implement MapperWorker;
 
 include "sys.m";
@@ -67,7 +80,6 @@ init()
 
 	downloadMutex = chan [1] of int;
 	downloadMutex2 = chan [1] of int;
-	sys->print("111\n");
 }
 
 run(mapperTask : ref MapperTask)
@@ -76,26 +88,20 @@ run(mapperTask : ref MapperTask)
 	getmr(mapperTask);
 	<-downloadMutex;
 
-	sys->print("322\n");
 	folderName := mapperPath + "tasks_" + string mapperTask.id + "/";
 	sys->create(folderName, sys->OREAD, sys->DMDIR + 8r777);
-	sys->print("333\n");
 
 	downloadMutex2 <-= 0;
 	getFileBlock(mapperTask);
 	<-downloadMutex2;
 
 	buffer := bufio->open(folderName + mapperTask.inputFileBlock.fileName + "_inputFileBlock", Bufio->OREAD);
-	sys->print("444\n");
 
 	collector := collect(buffer);
-	sys->print("555\n");
 
 	saveToLocal(mapperTask, collector, folderName);
-	sys->print("666\n");
 
 	spawn ioutil->sendRemoteFile(70000 + mapperTask.id,folderName);
-	sys->print("777\n");
 } 
 
 collect(buffer : ref Iobuf) : ref OutputCollector
@@ -120,9 +126,11 @@ collect(buffer : ref Iobuf) : ref OutputCollector
 saveToLocal(mapperTask : ref MapperTask, collector : ref OutputCollector, folderName : string)
 {
 	fds := array[mapperTask.reducerAmount] of ref FD;
+	buffers := array[mapperTask.reducerAmount] of ref Iobuf;
 	for(i := 0; i < mapperTask.reducerAmount; i++)
 	{
 		fds[i] = sys->create(folderName + "tcp!" +  mapperAddr + "!" + string (70000 + mapperTask.id) + "_part_" + string i, sys->ORDWR, 8r600);
+		buffers[i] = bufio->open(folderName + "tcp!" +  mapperAddr + "!" + string (70000 + mapperTask.id) + "_part_" + string i, bufio->OWRITE);
 	}
 
 	recordMap := collector.getMap();
@@ -143,37 +151,35 @@ saveToLocal(mapperTask : ref MapperTask, collector : ref OutputCollector, folder
 
 		if (mapperTask.combinable == 1) {
 			(key_cb, value_cb) := mapreduce->combine(key, values);
-			sys->fprint(fds[j], "%s", key_cb + " " + value_cb + "\n");
+			buffers[j].puts(key_cb + " " + value_cb + "\n");
 		}
 		else {
 			for( ; values != nil; values = tl values)
 			{
 				value := hd values;
-				sys->fprint(fds[j], "%s", key + " " + value + "\n");
+				buffers[j].puts(key + " " + value + "\n");
 			}
 		}
+	}
+
+	for(i = 0; i < mapperTask.reducerAmount; i++)
+	{
+		buffers[i].flush();
+		buffers[i].close();
 	}
 }
 
 getmr(mapperTask : ref MapperTask)
 {
-	sys->print("222\n");
 	if(sys->open(mapperPath + mapperTask.mrClassName, Sys->OREAD) == nil)
 	{
 		dfsclient->init();
-		sys->print("233\n");
 		file := dfsclient->getFile(mapperTask.mrClassName);
-		sys->print("244\n");
 		total := (lists->last(file.chunks)).offset + big (lists->last(file.chunks)).size;
-		sys->print("255\n");
 		fd := sys->create(mapperPath + mapperTask.mrClassName, Sys->ORDWR, 8r600);
-		sys->print("266\n");
 		dd(fd, file,big 0,total);
-		sys->print("288\n");
 	}
-	sys->print("300\n");
 	mapreduce = load MapReduce (mapperPath + mapperTask.mrClassName);
-	sys->print("310\n");
 	mapreduce->init();
 }
 

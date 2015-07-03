@@ -1,3 +1,16 @@
+########################################
+#
+#	The implemention of DFSNodeServer.
+#	DFSNodeServer is the service interface that the DFS data node can provide to DFSClient.
+#	Every data node in dfs use dfsnodeserver to transport file chunks and communicate with master.
+#	DFSNodeServer announce a Connection,
+#	listen the message from other computing equipment,
+#	and do appropriate operation,such as read, write, delete or lineoffset the DFSChunk.
+#
+#	@author Yang Fan(fyabc) 
+#
+########################################
+
 implement DFSNodeServer;
 
 include "sys.m";

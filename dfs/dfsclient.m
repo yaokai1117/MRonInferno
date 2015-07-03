@@ -1,3 +1,12 @@
+########################################
+#
+#	The Client side of the distributed file system.
+#	Provide APIs (such as createFile, getFile, readChunk, writeChunk) of the distributed file system for Mapreduce Calculation Model.
+#	
+#	@author Kai Yao(yaokai)
+#	@author Yang Fan(fyabc) 
+#
+########################################
 DFSClient : module {
 	PATH : con "/appl/MR/dfs/dfsclient.dis";
 	

@@ -123,8 +123,8 @@ run(mapperFileAddrs : list of string , reducerTask : ref ReducerTask) : (int, st
 	buffer.flush();
 	buffer.close();
 
-	ud(folderName , string reducerTask.id + "_" + reducerTask.outputFile , reducerTask.outputRep , reducerTask.outputSize);
-	return (1, nil);
+#ud(folderName , string reducerTask.id + "_" + reducerTask.outputFile , reducerTask.outputRep , reducerTask.outputSize);
+	return (0, nil);
 }
 
 getmr(reducerTask : ref ReducerTask)
@@ -181,7 +181,6 @@ ud(folderName : string , fileName : string , replicas : int , chunkSize : int)
 		for (q := chunk.nodes; q != nil; q = tl q)
 			sys->print("\t\t%s", (hd q).toString());
 	}
-	sys->chdir("/appl/MR/");
 }
 
 dd(fd : ref Sys->FD, file : ref DFSFile, offset : big, size : big)

@@ -1,3 +1,12 @@
+########################################
+#
+#	The Implement of XmlHandle.
+#
+#	@author Kai Yao(yaokai)
+#
+########################################
+
+
 implement XmlHandle;
 
 include "sys.m";

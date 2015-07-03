@@ -1,3 +1,14 @@
+########################################
+#
+#	The implemention of Download.
+#	This program can be called in inferno shell, to download a file in distributed file system.
+#	An example of this command is: "download hello.txt".
+#
+#	@author Yang Fan(fyabc) 
+#	@author Kai Yao(yaokai)
+#
+########################################
+
 implement Download;
 
 include "sys.m";

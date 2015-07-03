@@ -52,7 +52,7 @@ init(ctxt : ref Draw->Context, args : list of string)
 	logger->init();
 	logger->setFileName("log_tasktrackerserver");
 
-	mutex = chan [1] of int;
+	mutex = chan[1] of int;
 
 	buffer := bufio->open("/appl/MR/config", Bufio->OREAD);
 	hostAddr = buffer.gets('\n');
@@ -176,6 +176,8 @@ runReducer(mapperFileAddr : string, reducer : ref ReducerTask)
 	}
 	else if (ok == 1) { 	#still pending
 		logger->logInfo("ReducerTask " + string reducer.id + " from job " + string reducer.jobId + " get mapper address!");
+		logger->scrlogInfo("ReducerTask " + string reducer.id + " from job " + string reducer.jobId + " get mapper address!");
+
 		return;
 	}
 	else {

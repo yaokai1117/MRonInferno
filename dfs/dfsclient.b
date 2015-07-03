@@ -1,3 +1,14 @@
+########################################
+#
+#	The implemention of DFSClient.
+#	It creates some connections with DFSServer and DFSNodeServer,
+#	and communicate information and data with them.
+#	
+#	@author Kai Yao(yaokai)
+#	@author Yang Fan(fyabc) 
+#
+########################################
+
 implement DFSClient;
 
 include "sys.m";

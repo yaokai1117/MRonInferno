@@ -1,3 +1,15 @@
+########################################
+#
+#	The implemention of Upload.
+#	This program can be called in inferno shell, to upload a local file to distributed file system.
+#	An example of this command is: "upload -r 3 -s 1000 hello.txt".
+#
+#	@author Kai Yao(yaokai)
+#	@author Yang Fan(fyabc) 
+#
+########################################
+
+
 implement Upload;
 
 include "sys.m";

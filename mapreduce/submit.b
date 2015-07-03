@@ -1,14 +1,3 @@
-########################################
-#
-#	The implemention of SimpleClient.
-#	SimpleClient is the client side of the MapReduce framework.
-#	The user of the MapReduce framework use this program to submit a job and start the job.
-#	
-#	@author Kai Yao(yaokai)
-#	@author Yang Fan(fyabc)
-#
-########################################
-
 implement SimpleClient;
 
 include "sys.m";
@@ -36,10 +25,15 @@ init (ctxt : ref Draw->Context, args : list of string)
 	hostAddr := buffer.gets('\n');
 	hostAddr = hostAddr[: len hostAddr - 1];
 
+	fd := sys->open("/appl/MR/jobconfig", Sys->OREAD);
+	buf2 := array [Sys->ATOMICIO] of byte;
+	confLen := sys->read(fd, buf2, len buf);
+	for (i := 0; i < len buf2; i++)
+		if (buf2[i] == byte '\n')
+			buf2[i] = byte '@';
+
 	(n, conn) := sys->dial("tcp!" + hostAddr + "!66666", nil);
-	p := args;
-	p = tl p;
-	sys->write(conn.dfd, array of byte hd p, len hd p);
+	sys->fprint(conn.dfd, "submit@jobConfig@%s", string buf2[:confLen]);
 	length := sys->read(conn.dfd, buf, len buf);
 	sys->print("%s", string buf[:length]);
 }

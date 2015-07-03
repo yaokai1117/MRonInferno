@@ -1,3 +1,11 @@
+########################################
+#
+#	The Implement of Logger.
+#	
+#	@author Xinyang Shao(daniel)
+#
+########################################
+
 implement Logger;
 
 include "sys.m";
