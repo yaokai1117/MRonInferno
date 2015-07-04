@@ -1,3 +1,14 @@
+########################################
+#
+#	The implemention of the ReducerWorker module.
+#	ReducerWorker use getRemoteFile() get its partitions of files from each mapper,
+#	then mergeSortedFiles() merge them into an unreducedFile. In unreducedFile, pairs with the same key will near.
+#	reduce() collect these (key , values) into collector, and write the collector into local file and upload it to DFS. 
+#	
+#	@author Yang Fan(fyabc) 
+#	@author Guanji Gao(ggj)
+#
+########################################
 implement ReducerWorker;
 
 include "sys.m";
@@ -64,10 +75,10 @@ run(mapperFileAddrs : list of string , reducerTask : ref ReducerTask) : (int, st
 	sys->create(folderName, sys->OREAD, sys->DMDIR + 8r777);
 	files : list of string;
 
-	for( ; mapperFileAddrs != nil; mapperFileAddrs = tl mapperFileAddrs)
+	for(p := mapperFileAddrs; p != nil; p = tl p)
 	{
-		mapperFileAddr := hd mapperFileAddrs;
-		if (nil == ioutil->getRemoteFile(mapperFileAddr , mapperFileAddr + "_part_" + string reducerTask.partitionIndex , folderName))
+		mapperFileAddr := hd p;
+		if (ioutil->getRemoteFile(mapperFileAddr , mapperFileAddr + "_part_" + string reducerTask.partitionIndex , folderName) == nil)
 			return (-1, mapperFileAddr);
 		files = (folderName + mapperFileAddr + "_part_" + string reducerTask.partitionIndex) :: files;
 	}

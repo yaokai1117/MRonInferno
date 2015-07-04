@@ -6,7 +6,6 @@
 #	saveToLocal() sort and combine the pairs in OutputCollector and write it into a local file.
 #
 #	@author Yang Fan(fyabc) 
-#	@author Kai Yao(yaokai)
 #	@author Guanji Gao(ggj)
 #
 ########################################

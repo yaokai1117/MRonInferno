@@ -65,6 +65,26 @@ init()
 
 split(fileName : string, number : int) : list of ref FileBlock
 {
+	(length, files) := sys->tokenize(fileName, ",");
+	ret : list of ref FileBlock;
+	eachNum := number / length;
+	if (eachNum < 0) {
+		logger->log("IOUtil->split failed", Logger->ERROR);
+		logger->scrlog("IOUtil->split failed", Logger->ERROR);
+		return nil;
+	}
+	for (p := files; p != nil; p = tl p) {
+		if (tl p == nil)
+			eachNum = number;
+		eachList := splitOneFile(hd p, eachNum);
+		ret = lists->concat(ret, eachList);
+		number -= eachNum;
+	}
+	return ret;
+}
+
+splitOneFile(fileName : string, number : int) : list of ref FileBlock
+{
 	ret : list of ref FileBlock;
 	dfsclient->init();
 	file := dfsclient->getFile(fileName);

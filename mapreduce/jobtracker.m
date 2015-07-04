@@ -1,3 +1,14 @@
+########################################
+#
+#	The JobTracker module run the job.
+#	It assigns and coordinates all the tasktrackers.
+#	When the job is started, Jobtracker will produce mapperTasks and reducerTasks, and then shoot them to different tasktrackers.
+#	Jobtracker will monitor the states of tasktrackers and tasks, 
+#	and do some steps ,such as change tasks to other tasktrackers if some tasks are failed or some tasktrackers are broken.
+#	
+#	@author Kai Yao(yaokai)
+#
+########################################
 JobTracker : module {
 		PATH : con "/appl/MR/mapreduce/jobtracker.dis";
 

@@ -1,3 +1,12 @@
+#######################################
+#
+#	The implemention of the TaskTracker module.
+#	MapperAddrList stores addresses of mapper results. When mapperTasks are all succeed, these addresses will be sent to ReducerWorkers.
+#
+#	@author Yang Fan(fyabc) 
+#
+########################################
+
 implement TaskTracker;
 
 include "sys.m";
@@ -50,14 +59,15 @@ runMapperTask(mapper : ref MapperTask) : int
 runReducerTask(mapperFileAddr : string, reducer : ref ReducerTask) : (int, string)
 {
 	mapperAddrList := m2rTable.find(reducer.id);
+	sys->print("tracker get %s\n", mapperFileAddr);
 	if (mapperAddrList == nil) {
 		mapperAddrList = ref MapperAddrList(mapperFileAddr :: nil);
 		m2rTable.add(reducer.id, mapperAddrList);
-	}
-	if (len mapperAddrList.items < reducer.mapperAmount) {
+	} else {
 		mapperAddrList.items = mapperFileAddr :: mapperAddrList.items;
-		return (1, nil);
 	}
+	if (len mapperAddrList.items < reducer.mapperAmount) 
+		return (1, nil);
 	
 	return reducerworker->run(mapperAddrList.items, reducer);
 }

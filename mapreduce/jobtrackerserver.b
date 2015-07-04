@@ -1,3 +1,14 @@
+########################################
+#
+#	The implemention of the JobTrackerServer module.
+#	The JobTrackerServer module is the server of jobtracker.
+#	It receives message about jobs from the client side, shoot mapper and reducer tasks to tasktrackers and get heartbeats from tasktrackers.
+#
+#	@author Kai Yao(yaokai)
+#	@author Yang Fan(fyabc) 
+#
+########################################
+
 implement JobTrackerServer;
 
 include "sys.m";

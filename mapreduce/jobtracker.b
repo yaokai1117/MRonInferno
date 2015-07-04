@@ -1,3 +1,13 @@
+########################################
+#
+#	The implemention of the JobTracker module.
+#	checkTrackers() check heartbeats from taskTrackers.
+#	getTaskTracker() get the tasktracker which has the least tasks now.
+#
+#	@author Kai Yao(yaokai)
+#
+########################################
+
 implement JobTracker;
 
 include "sys.m";
@@ -39,6 +49,7 @@ MapperFileAddr : adt {
 INF : con 100000;
 
 maxTaskId : int;
+time : int;
 
 jobs : ref Tables->Table[ref Job];
 taskTrackers : ref Tables->Strhash[ref TaskTracker];
@@ -104,6 +115,7 @@ submitJob(config : ref JobConfig) : int
 
 startJob(id : int) : int
 {
+	time = sys->millisec();
 	job := jobs.find(id);
 	if (job == nil) {
 		logger->log("StartJob failed, no such job!", Logger->ERROR);
@@ -265,8 +277,10 @@ mapperSucceed(task : ref MapperTask, mapperFileAddr : string) : int
 	taskTracker.mappers = lists->delete(localTask, taskTracker.mappers);
 
 	m2rRecord := m2rTable.find(task.jobId);
-	if (m2rRecord == nil) 
+	if (m2rRecord == nil) {
 		m2rTable.add(task.jobId, ref MapperFileAddr((task.id, mapperFileAddr) :: nil));
+		m2rRecord = m2rTable.find(task.jobId);
+	}
 	else
 		m2rRecord.items = (task.id, mapperFileAddr) :: m2rRecord.items;
 
@@ -307,6 +321,8 @@ reducerSucceed(task : ref ReducerTask) : int
 	if (job.getStatus() == MRUtil->SUCCESS) {
 		logger->logInfo("Job " + string job.id + " Succeed!!!");
 		logger->scrlogInfo("Job " + string job.id + " Succeed!!!");
+		logger->logInfo("Total time: " + string (sys->millisec() - time) + " mms");
+		logger->scrlogInfo("Total time: " + string (sys->millisec() - time) + " mms");
 		jobs.del(job.id);
 	}
 

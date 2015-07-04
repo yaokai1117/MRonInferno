@@ -12,7 +12,6 @@
 #	they are sent to different reducer tasks.
 #	
 #	@author Yang Fan(fyabc)
-#	@author Kai Yao(yaokai)
 #
 ########################################
 

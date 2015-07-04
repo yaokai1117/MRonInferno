@@ -42,7 +42,7 @@ init(ctxt : ref Draw->Context, args : list of string)
 	dfsclient->init();
 
 	replicas := 3;
-	chunkSize := 1000; 		# debug
+	chunkSize := 200000; 		# debug
 	arg->init(args);
 	while ((c := arg->opt()) != 0)
 		case c {

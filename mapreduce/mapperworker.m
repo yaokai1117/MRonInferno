@@ -4,7 +4,6 @@
 #	It run the user map function and save the result to local.
 #	
 #	@author Yang Fan(fyabc) 
-#	@author Kai Yao(yaokai)
 #	@author Guanji Gao(ggj)
 #
 ########################################
