@@ -5,40 +5,28 @@ a small MapReduce framework on Inferno written in Limbo, just like many other Ma
 ## MapReduce Calculation Model
 
 this part is the main part of the MapReduce framework. The main modules of this part is JobTracker, TaskTracker, MapperWorker, and ReducerWorker.
-
-* ioutil: 
-    The IOUtil module includes some often used adts and utilities when doing MapReduce.
     
-* mrutil:
-	The MRUtil module includes important adts in mapreduce model.
-
-* jobs:
-	The Jobs module includes adts of Job and JobConfig.
+* ioutil, mrutil, jobs:
+	These modules includes important adts and functions in mapreduce model.
 
 * jobtracker:
 	The JobTracker module run the job.
 	It assigns and coordinates all the tasktrackers.
-
-* jobtrackerserver:
-	The JobTrackerServer handle the communication between jobtracker and other tasktrackers.
-
+	
 * tasktracker:
 	TaskTracker handle mappers and reducers .
 
-* tasktrackerserver:
-	Just like jobtracker, handle the communication.
+* jobtrackerserver, tasktrackerserver:
+	These two modules handle the communication between jobtracker and tasktrackers.
 
-* mapperworker:
-	Do map tasks.
-
-* reducerworker:
-	Do reduce tasks
+* mapperworker, reducerworker:
+	Do mapping and reducing tasks.
 
 * mapreduce:
 	The MapReduce interface.
 
 * submit, start:
-	The client side of the MapReduce framework. The user of the MapReduce framework use this program to submit a job and start the job.
+	Users use these program to submit a job and start the job.
 
 ## DFS 
 this part is the file partition,transport and scheduling module of our MapReduce framework.
