@@ -70,11 +70,13 @@ this part is the logger of the distributed file system and Mapreduce jobs.
 3. Implement "mapreduce.m".("wordcount.dis" is an example.) Do not forget to compile it.
 
 4. The host open a new Inferno shell window, and start a dfsserver:     
-    $sh fuck.sh
+    	**be sure that you are in the Inferno shell**	
+	**first, you should change your working directory to /appl/MR**    
+	$cd /appl/MR	
+	$dfs/dfsserver
    
 5. Other computers start a dfsnodeserver:   
-	**first, you should change your working directory to /appl/MR**    
-	$/dfsdfsnodeserver
+	$dfs/dfsnodeserver
 	
 6. If all computers are connected, you should upload the input file and the implemention of mapreduce : 
 	$dfs/upload wctest   
